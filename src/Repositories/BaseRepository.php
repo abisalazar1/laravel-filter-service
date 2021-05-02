@@ -37,7 +37,7 @@ abstract class BaseRepository
         $query = null
     ) {
         return $this->model->filter($data, $user, $query)
-            ->paginate();
+            ->paginate(request()->per_page);
     }
 
     /**

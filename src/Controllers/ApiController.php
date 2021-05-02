@@ -2,7 +2,10 @@
 
 namespace Abix\DataFiltering\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Abix\DataFiltering\Transformers\BaseTransformer;
 
 class ApiController
 {
@@ -37,7 +40,7 @@ class ApiController
     /**
      * Transformer
      *
-     * @var Transfomer
+     * @var string
      */
     protected $transformer = null;
 
@@ -48,17 +51,14 @@ class ApiController
      * @param  string  $message
      * @return self
      */
-    public function setCode(int $code, ?string $message = null)
+    protected function setCode(int $code, ?string $message = null): self
     {
         $this->code = $code;
 
         if ($this->code >= 400) {
             $this->hasErrors = true;
             $this->status = 'error';
-
-            $this->data = [
-                'message' => $this->getErrorMessage($message),
-            ];
+            $this->data['message'] = $this->getErrorMessage($message);
         }
 
         return $this;
@@ -70,7 +70,7 @@ class ApiController
      * @param string $transformer
      * @return self
      */
-    public function setTransformer(string $transformer)
+    protected function setTransformer(string $transformer): self
     {
         $this->transformer = $transformer;
 
@@ -83,9 +83,10 @@ class ApiController
      * @param  mix  $data
      * @return self
      */
-    public function setData($data, $method = null)
+    protected function setData($data, $method = null): self
     {
-        $this->data = resolve($this->transformer)->transformData($data, $method);
+        $this->data = $this->guessTrasformer()
+            ->transformData($data, $method);
 
         return $this;
     }
@@ -94,9 +95,9 @@ class ApiController
      * Sends the response
      *
      * @param  array|null $response
-     * @return Response
+     * @return JsonResponse
      */
-    public function respond(?array $response = [])
+    protected function respond(?array $response = []): JsonResponse
     {
         $data = array_merge([
             'code' => $this->code,
@@ -113,14 +114,32 @@ class ApiController
      * Gets the status message
      *
      * @param  string $message
-     * @return void
+     * @return string
      */
-    public function getErrorMessage(?string $message)
+    protected function getErrorMessage(?string $message): string
     {
         if ($message) {
             return $message;
         }
 
         return Response::$statusTexts[$this->code];
+    }
+
+    /**
+     * Resolves the transformer
+     *
+     * @return void
+     */
+    protected function guessTrasformer(): BaseTransformer
+    {
+        if ($this->transformer) {
+            return resolve($this->transformer);
+        }
+
+        $transformer = (string) Str::of(class_basename($this))
+            ->prepend('App\Transformers\\')
+            ->replace('Controller', 'Transformer');
+
+        return resolve($transformer);
     }
 }
