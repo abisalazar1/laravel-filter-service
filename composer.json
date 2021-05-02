@@ -1,0 +1,19 @@
+{
+    "name": "abix/data-filtering",
+    "description": "Data filtering",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Abi",
+            "email": "abi_salazar@hotmail.co.uk"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Abix\\DataFiltering\\": "src/"
+        }
+    },
+    "require": {}
+}
