@@ -48,7 +48,7 @@ class ApiController
     /**
      * Repository
      *
-     * @var string
+     * @var BaseRepository
      */
     protected $repository = null;
 
