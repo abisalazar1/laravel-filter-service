@@ -2,10 +2,11 @@
 
 namespace Abix\DataFiltering\Controllers;
 
+use Abix\DataFiltering\Repositories\BaseRepository;
+use Abix\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Support\Str;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Abix\DataFiltering\Transformers\BaseTransformer;
 
 class ApiController
 {
@@ -43,6 +44,21 @@ class ApiController
      * @var string
      */
     protected $transformer = null;
+
+    /**
+     * Repository
+     *
+     * @var string
+     */
+    protected $repository = null;
+
+    /**
+     * Guesses the repository
+     */
+    public function __construct()
+    {
+        $this->repository = $this->guessRepository();
+    }
 
     /**
      * Sets http code
@@ -128,7 +144,7 @@ class ApiController
     /**
      * Resolves the transformer
      *
-     * @return void
+     * @return BaseTransformer
      */
     protected function guessTrasformer(): BaseTransformer
     {
@@ -141,5 +157,23 @@ class ApiController
             ->replace('Controller', 'Transformer');
 
         return resolve($transformer);
+    }
+
+    /**
+     * Repository
+     *
+     * @return BaseRepository
+     */
+    protected function guessRepository(): BaseRepository
+    {
+        if ($this->repository) {
+            return resolve($this->repository);
+        }
+
+        $repository = (string) Str::of(class_basename($this))
+            ->prepend('App\Repositories\\')
+            ->replace('Controller', 'Repository');
+
+        return resolve($repository);
     }
 }
