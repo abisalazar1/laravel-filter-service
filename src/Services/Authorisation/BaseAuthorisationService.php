@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering\Authorisation;
+namespace Abix\DataFiltering\Services\Authorisation;
 
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
