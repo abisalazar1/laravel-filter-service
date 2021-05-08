@@ -6,8 +6,15 @@ use Illuminate\Support\Str;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Model;
 
-class FilterService
+class BaseFilterService
 {
+    /**
+     * Select
+     *
+     * @var array
+     */
+    protected $select = [];
+
     /**
      * User
      *
@@ -71,6 +78,7 @@ class FilterService
         'setUser',
         'setData',
         'setQuery',
+        'setSelect',
         'applySort',
         'setConditions',
         'setFilters',
@@ -207,6 +215,10 @@ class FilterService
         // Apply automatic filters
         $this->setFilters($this->autoApply);
 
+        if (count($this->select)) {
+            $this->query->select($this->select);
+        }
+
         return $this->query;
     }
 
@@ -231,12 +243,10 @@ class FilterService
      */
     public function sort($sortValues): self
     {
-        if (is_iterable($sortValues)) {
-            foreach ($sortValues as $sort) {
-                $this->applySort($sort);
-            }
-        } else {
-            $this->applySort($sortValues);
+        $sortValues = is_iterable($sortValues) ? $sortValues : [$sortValues];
+
+        foreach ($sortValues as $sort) {
+            $this->applySort($sort);
         }
 
         return $this;
@@ -305,6 +315,19 @@ class FilterService
                 $this->$method($value);
             }
         }
+    }
+
+    /**
+     * Adds the select
+     *
+     * @param array $value
+     * @return self
+     */
+    public function setSelect(array $value = []): self
+    {
+        $this->select = count($value) ? $value : $this->select;
+
+        return $this;
     }
 
     /**
