@@ -40,11 +40,11 @@ class ApiController
     protected $pagination = [];
 
     /**
-     * has Error
+     * Custom message for the status
      *
-     * @var boolean
+     * @var string
      */
-    protected $hasErrors = false;
+    protected $statusMessage = '';
 
     /**
      * Transformer
@@ -80,10 +80,10 @@ class ApiController
         $this->code = $code;
 
         if ($this->code >= 400) {
-            $this->hasErrors = true;
             $this->status = 'error';
-            $this->data['message'] = $this->getErrorMessage($message);
         }
+
+        $this->statusMessage = $message;
 
         return $this;
     }
@@ -147,6 +147,7 @@ class ApiController
                 [
                     'code' => $this->code,
                     'status' => $this->status,
+                    'message' => $this->getStatusMessage(),
                 ],
                 $this->data,
                 $response,
@@ -159,13 +160,12 @@ class ApiController
     /**
      * Gets the status message
      *
-     * @param  string $message
      * @return string
      */
-    protected function getErrorMessage(?string $message): string
+    protected function getStatusMessage(): string
     {
-        if ($message) {
-            return $message;
+        if ($this->statusMessage) {
+            return $this->statusMessage;
         }
 
         return Response::$statusTexts[$this->code];
