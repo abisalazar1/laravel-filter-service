@@ -2,11 +2,12 @@
 
 namespace Abix\DataFiltering\Controllers;
 
-use Abix\DataFiltering\Repositories\BaseRepository;
-use Abix\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Support\Str;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
+use Abix\DataFiltering\Repositories\BaseRepository;
+use Abix\DataFiltering\Transformers\BaseTransformer;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ApiController
 {
@@ -30,6 +31,13 @@ class ApiController
      * @var array
      */
     protected $data = [];
+
+    /**
+     * Pagination
+     *
+     * @var array
+     */
+    protected $pagination = [];
 
     /**
      * has Error
@@ -94,15 +102,29 @@ class ApiController
     }
 
     /**
-     * Sets the data
+     * Sets the main data
      *
-     * @param  mix  $data
+     * @param Collection|Model $data
+     * @param string $wrapper
+     * @param string $method
      * @return self
      */
-    protected function setData($data, $method = null): self
-    {
-        $this->data = $this->guessTrasformer()
-            ->transformData($data, $method);
+    protected function setData(
+        $data,
+        string $wrapper = null,
+        string $method = null
+    ): self {
+        $transformer = $this->guessTrasformer();
+
+        if (!$wrapper) {
+            $wrapper = $transformer->wrapper;
+        }
+
+        $this->data[$wrapper] = $transformer->transformData($data, $method);
+
+        if ($data instanceof LengthAwarePaginator) {
+            $this->pagination['pagination'] = $this->getPagination($data);
+        }
 
         return $this;
     }
@@ -110,18 +132,26 @@ class ApiController
     /**
      * Sends the response
      *
-     * @param  array|null $response
+     * @param array|null $response
+     * @param boolean $overide
      * @return JsonResponse
      */
-    protected function respond(?array $response = []): JsonResponse
-    {
-        $data = array_merge([
-            'code' => $this->code,
-            'status' => $this->status,
-        ], $response, $this->data);
+    protected function respond(
+        ?array $response = [],
+        bool $overide = false
+    ): JsonResponse {
+        $method = $overide ? 'array_merge' : 'array_merge_recursive';
 
         return response()->json(
-            $data,
+            $method(
+                [
+                    'code' => $this->code,
+                    'status' => $this->status,
+                ],
+                $this->data,
+                $response,
+                $this->pagination
+            ),
             $this->code
         );
     }
@@ -139,6 +169,26 @@ class ApiController
         }
 
         return Response::$statusTexts[$this->code];
+    }
+
+    /**
+     * Gets the pagination
+     *
+     * @param LengthAwarePaginator $data
+     * @return array
+     */
+    protected function getPagination(LengthAwarePaginator $data): array
+    {
+        return [
+            'current_page' => $data->currentPage(),
+            'from' => $data->firstItem(),
+            'last_page' => $data->lastPage(),
+            'next_page_url' => $data->nextPageUrl(),
+            'per_page' => $data->perPage(),
+            'prev_page_url' => $data->previousPageUrl(),
+            'to' => $data->lastItem(),
+            'total' => $data->total(),
+        ];
     }
 
     /**

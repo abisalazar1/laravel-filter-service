@@ -15,7 +15,7 @@ abstract class BaseTransformer
      *
      * @var string
      */
-    protected $wrapper = 'data';
+    public $wrapper = 'data';
 
     /**
      * Rename props
@@ -53,38 +53,9 @@ abstract class BaseTransformer
      */
     public function transformData($data, string $formatMethod = null)
     {
-        $pagination = [];
-
         $this->formatMethod = $formatMethod;
 
-        if ($data instanceof LengthAwarePaginator) {
-            $pagination['pagination'] = $this->getPagination($data);
-        }
-
-        return array_merge([
-            $this->wrapper => $this->format($data),
-        ], $pagination);
-    }
-
-
-    /**
-     * Gets the pagination
-     *
-     * @param LengthAwarePaginator $data
-     * @return array
-     */
-    protected function getPagination(LengthAwarePaginator $data): array
-    {
-        return [
-            'current_page' => $data->currentPage(),
-            'from' => $data->firstItem(),
-            'last_page' => $data->lastPage(),
-            'next_page_url' => $data->nextPageUrl(),
-            'per_page' => $data->perPage(),
-            'prev_page_url' => $data->previousPageUrl(),
-            'to' => $data->lastItem(),
-            'total' => $data->total(),
-        ];
+        return $this->format($data);
     }
 
     /**
