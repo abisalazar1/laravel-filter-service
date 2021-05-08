@@ -21,8 +21,10 @@ trait DatabaseFilterable
         ?User $user,
         $query = null
     ): Builder {
-        if (!$this->defaultFilterService) {
-            $filterService = BaseFilterService::class;
+        $filterService = BaseFilterService::class;
+
+        if (property_exists($this, 'defaultFilterService')) {
+            $filterService = $this->defaultFilterService;
         }
 
         return (new $filterService())
