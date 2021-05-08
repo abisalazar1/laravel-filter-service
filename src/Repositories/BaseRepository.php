@@ -52,6 +52,16 @@ abstract class BaseRepository
     }
 
     /**
+     * Gets run before the model is created
+     *
+     * @param array $attributes
+     * @return void
+     */
+    protected function beforeCreate(array &$attributes = [])
+    {
+    }
+
+    /**
      * Creates a record
      *
      * @param array $attributes
@@ -59,7 +69,39 @@ abstract class BaseRepository
      */
     public function create(array $attributes)
     {
-        return $this->model->create($attributes);
+        $this->beforeCreate($attributes);
+
+        $model = $this->model->create($attributes);
+
+        $this->afterCreated($model, $attributes);
+
+        return $model;
+    }
+
+    /**
+     * After created
+     *
+     * @param Model $model
+     * @param array $attributes
+     * @return void
+     */
+    protected function afterCreated(
+        Model $model,
+        array $attributes
+    ) {
+    }
+
+    /**
+     * Runs before model gets updated
+     *
+     * @param array $attributes
+     * @param Model $model
+     * @return void
+     */
+    protected function beforeUpdate(
+        Model $model = null,
+        array &$attributes = []
+    ) {
     }
 
     /**
@@ -69,14 +111,32 @@ abstract class BaseRepository
      * @param array $attributes
      * @return Model
      */
-    public function update($id, array $attributes)
+    public function update($model, array $attributes)
     {
-        if (!$id instanceof Model) {
-            $id = $this->get($id);
+        if (!$model instanceof Model) {
+            $model = $this->get($model);
         }
-        return tap($id, function ($model) use ($attributes) {
+
+        $this->beforeUpdate($model, $attributes);
+
+        return tap($model, function ($model) use ($attributes) {
             $model->update($attributes);
+
+            $this->afterUpdated($model, $attributes);
         });
+    }
+
+    /**
+     * Runs after the model is updated
+     *
+     * @param Model $model
+     * @param array $attributes
+     * @return void
+     */
+    protected function afterUpdated(
+        Model $model,
+        array $attributes
+    ) {
     }
 
     /**
