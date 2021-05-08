@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace Abix\DataFiltering\Requests;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
