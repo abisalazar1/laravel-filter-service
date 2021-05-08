@@ -4,7 +4,7 @@ namespace Abix\DataFiltering\Traits;
 
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Builder;
-use Abix\DataFiltering\Services\Filters\FilterService;
+use Abix\DataFiltering\Services\Filters\BaseFilterService;
 
 trait DatabaseFilterable
 {
@@ -22,7 +22,7 @@ trait DatabaseFilterable
         $query = null
     ): Builder {
         if (!$this->defaultFilterService) {
-            $filterService = FilterService::class;
+            $filterService = BaseFilterService::class;
         }
 
         return (new $filterService())
