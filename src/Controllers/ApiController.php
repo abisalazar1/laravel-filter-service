@@ -138,7 +138,7 @@ class ApiController
      */
     protected function respond(
         ?array $response = [],
-        bool $overide = false
+        bool $overide = true
     ): JsonResponse {
         $method = $overide ? 'array_merge' : 'array_merge_recursive';
 
