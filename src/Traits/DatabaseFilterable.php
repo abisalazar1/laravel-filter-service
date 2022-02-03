@@ -19,7 +19,8 @@ trait DatabaseFilterable
     public function filter(
         array $data,
         ?User $user,
-        $query = null
+        $query = null,
+        array $extras = []
     ): Builder {
         $filterService = BaseFilterService::class;
 
@@ -32,6 +33,7 @@ trait DatabaseFilterable
             ->setQuery($query)
             ->setUser($user)
             ->setData($data)
+            ->setExtras($extras)
             ->filter();
     }
 

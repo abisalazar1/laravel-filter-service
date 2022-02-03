@@ -37,6 +37,13 @@ class BaseFilterService
     protected $data = [];
 
     /**
+     * Extra properties
+     *
+     * @var array
+     */
+    protected $extras = [];
+
+    /**
      * Builder
      *
      * @var Builder
@@ -78,6 +85,7 @@ class BaseFilterService
         'setUser',
         'setData',
         'setQuery',
+        'setExtras',
         'setSelect',
         'applySort',
         'setConditions',
@@ -131,6 +139,19 @@ class BaseFilterService
     public function setData(array $data = []): self
     {
         $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * Sets the data
+     *
+     * @param array $data
+     * @return self
+     */
+    public function setExtras(array $extras = []): self
+    {
+        $this->extras = $extras;
 
         return $this;
     }
@@ -354,5 +375,45 @@ class BaseFilterService
         $this->query->withCount($data);
 
         return $this;
+    }
+
+    /**
+     * Checks if value exists
+     *
+     * @param string $key
+     * @param mix $value
+     * @return boolean
+     */
+    public function filterHasValue(string $key, $value):bool
+    {
+        if (array_key_exists($key, $this->data)) {
+            return false;
+        }
+
+        return $this->data[$key] === $value;
+    }
+
+    /**
+     * Checks if keys exists
+     *
+     * @param array $keys
+     * @return boolean
+     */
+    public function filterHasKeys(array $keys = []):bool
+    {             
+        $dataKeys = array_keys($this->data);
+
+        return count(array_intersect($dataKeys, $keys)) === count($keys);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $property
+     * @return mixed
+     */
+    public function getExtraProperty(string $property):mixed
+    {
+        return optional($a)[$property];
     }
 }

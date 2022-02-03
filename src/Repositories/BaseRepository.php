@@ -34,10 +34,11 @@ abstract class BaseRepository
     public function index(
         array $data,
         ?User $user = null,
-        $query = null
+        $query = null,
+
     ) {
         return $this->model->filter($data, $user, $query)
-            ->paginate(request()->per_page);
+            ->paginate($data['per_page'] ?? 15);
     }
 
     /**

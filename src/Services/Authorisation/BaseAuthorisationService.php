@@ -14,7 +14,7 @@ class BaseAuthorisationService
      *
      * @var bool
      */
-    protected $resultAsBoolean = false;
+    protected $skipExceptions = false;
 
     /**
      * All Errors
@@ -28,16 +28,31 @@ class BaseAuthorisationService
      *
      * @var User
      */
-    protected $authenticatable = null;
+    protected $user = null;
 
     /**
-     * Gets the results as a boolean
+     * Array of properties
      *
+     * @var array
+     */
+    protected $properties = [];
+
+    /**
+     * Sets current property
+     *
+     * @var Model
+     */
+    protected $currentProperty = null;
+
+    /**
+     * Properties
+     *
+     * @param array $properties
      * @return self
      */
-    public function resultAsBoolean()
+    public function setProperties(array $properties = []): self
     {
-        $this->resultAsBoolean = true;
+        $this->properties = $properties;
 
         return $this;
     }
@@ -45,12 +60,24 @@ class BaseAuthorisationService
     /**
      * Sets the model to authenticate
      *
-     * @param User $authenticatable
+     * @param User $user
      * @return self
      */
-    public function setAuthenticatable(?User $authenticatable)
+    public function setUser(?User $authenticatable)
     {
         $this->authenticatable = $authenticatable;
+
+        return $this;
+    }
+
+    /**
+     * Gets the results as a boolean
+     *
+     * @return self
+     */
+    public function skipExceptions(): self
+    {
+        $this->skipExceptions = true;
 
         return $this;
     }
@@ -81,6 +108,17 @@ class BaseAuthorisationService
     }
 
     /**
+     * Gets a property
+     *
+     * @param string $property
+     * @return mixed
+     */
+    public function getProperty(string $property): mixed
+    {
+        return $this->properties[$property] ?? null;
+    }
+
+    /**
      * Checks the validation has passed
      *
      * @return boolean
@@ -99,7 +137,7 @@ class BaseAuthorisationService
      */
     protected function error(string $message): void
     {
-        if ($this->resultAsBoolean) {
+        if ($this->skipExceptions) {
             $this->errors[] = $message;
 
             return;
