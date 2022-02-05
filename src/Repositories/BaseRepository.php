@@ -2,9 +2,9 @@
 
 namespace Abix\DataFiltering\Repositories;
 
-use Illuminate\Support\Str;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Str;
 
 abstract class BaseRepository
 {
@@ -35,10 +35,16 @@ abstract class BaseRepository
         array $data,
         ?User $user = null,
         $query = null,
-
+        array $extras = []
     ) {
-        return $this->model->filter($data, $user, $query)
-            ->paginate($data['per_page'] ?? 15);
+        $method = empty($data['with_page_count']) ? 'paginate' : 'simplePaginate';
+
+        return $this->model->filter(
+            $data,
+            $user,
+            $query,
+            $extras
+        )->$method($data['per_page']);
     }
 
     /**
