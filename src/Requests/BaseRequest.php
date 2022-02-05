@@ -2,9 +2,9 @@
 
 namespace Abix\DataFiltering\Requests;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 abstract class BaseRequest extends FormRequest
 {
@@ -66,6 +66,7 @@ abstract class BaseRequest extends FormRequest
         return [
             'sort' => ['string'],
             'per_page' => ['integer', 'min:5', 'max:100'],
+            'with_page_count' => ['boolean'],
         ];
     }
 
