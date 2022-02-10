@@ -2,9 +2,9 @@
 
 namespace Abix\DataFiltering\Services\Filters;
 
-use Illuminate\Support\Str;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Str;
 
 class BaseFilterService
 {
@@ -73,7 +73,7 @@ class BaseFilterService
      *
      * @var string
      */
-    protected $defaultSortingColumn = 'id';
+    protected $defaultSortingColumn = ['id,desc', 'created_at'];
 
     /**
      * Methods that cannot be triggered by the data
@@ -384,7 +384,7 @@ class BaseFilterService
      * @param mix $value
      * @return boolean
      */
-    public function filterHasValue(string $key, $value):bool
+    public function filterHasValue(string $key, $value): bool
     {
         if (array_key_exists($key, $this->data)) {
             return false;
@@ -399,21 +399,21 @@ class BaseFilterService
      * @param array $keys
      * @return boolean
      */
-    public function filterHasKeys(array $keys = []):bool
-    {             
+    public function filterHasKeys(array $keys = []): bool
+    {
         $dataKeys = array_keys($this->data);
 
         return count(array_intersect($dataKeys, $keys)) === count($keys);
     }
 
     /**
-     * Undocumented function
+     * Gets the property
      *
      * @param string $property
      * @return mixed
      */
-    public function getExtraProperty(string $property):mixed
+    public function getExtraProperty(string $property): mixed
     {
-        return optional($a)[$property];
+        return optional($this->extras)[$property];
     }
 }

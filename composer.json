@@ -12,8 +12,14 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "Abix\\DataFiltering\\": "src/"
+            "Abix\\DataFiltering\\": "src"
         }
     },
-    "require": {}
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Abix\\DataFiltering\\DataFilteringServiceProvider"
+            ]
+        }
+    }
 }

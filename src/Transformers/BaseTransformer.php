@@ -2,11 +2,10 @@
 
 namespace Abix\DataFiltering\Transformers;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 abstract class BaseTransformer
 {
@@ -39,11 +38,27 @@ abstract class BaseTransformer
     protected $customAttributes = [];
 
     /**
-     * FormatterMethod
+     * Default Attributes
      *
-     * @var string
+     * @var array
      */
-    protected $formatMethod = null;
+    protected $defaultAttributes = [];
+
+    /**
+     * Protected Attributes
+     *
+     * @var array
+     */
+    protected $protectedAttributes = [];
+
+    /**
+     * Format
+     *
+     * @var array
+     */
+    protected $format = [
+        '*' => [],
+    ];
 
     /**
      * Sets the data
@@ -53,9 +68,30 @@ abstract class BaseTransformer
      */
     public function transformData($data, string $formatMethod = null)
     {
-        $this->formatMethod = $formatMethod;
+        return $this->format($data, $formatMethod);
+    }
 
-        return $this->format($data);
+    /**
+     * Gets format
+     *
+     * @param string|null $formatMethod
+     * @return array
+     */
+    public function getFormatting(?string $formatMethod = null): array
+    {
+        $method = Str::afterLast(Route::currentRouteAction(), '@');
+
+        $format = $this->format['*'] ?? [];
+
+        if ($formatMethod && array_key_exists($formatMethod, $this->format)) {
+            return array_merge($this->format[$formatMethod], $format);
+        }
+
+        if ($method && array_key_exists($method, $this->format)) {
+            return array_merge($this->format[$method], $format);
+        }
+
+        return [];
     }
 
     /**
@@ -64,11 +100,9 @@ abstract class BaseTransformer
      * @param Model|Collection $model
      * @return array
      */
-    protected function format($model): array
+    protected function format($model, ?string $formatMethod = null): array
     {
-        $format = $this->undotAttributes($this->getFormatting());
-
-        return $this->formatModel($model, $format);
+        return $this->formatModel($model, $this->getFormatting($formatMethod));
     }
 
     /**
@@ -81,79 +115,38 @@ abstract class BaseTransformer
     protected function formatModel($collection, $attributes): ?array
     {
         if (!$collection instanceof Model) {
-            return $collection->map(function ($model) use ($attributes) {
-                return $this->formatModel($model, $attributes);
-            })->toArray();
+            return optional(
+                optional($collection)->map(function ($model) use ($attributes) {
+                    return $this->formatModel($model, $attributes);
+                })
+            )->toArray();
         }
 
         $modelFormatted = [];
 
-        foreach ($attributes as $key => $value) {
-            if (is_iterable($value)) {
-                $modelFormatted[$this->renameKey($key)] = $this->formatModel($collection->$key, $value);
+        foreach ($attributes as $key => $attribute) {
+            if (is_iterable($attribute)) {
+                [$rename, $key] = $this->extractRenameAndValue($key);
+                $modelFormatted[$rename] = $this->formatModel($collection->$key, $attribute);
                 continue;
             }
+            [$rename, $value] = $this->extractRenameAndValue($attribute);
 
-            $modelFormatted[$this->renameKey($key)] = $this->runFormatters($key, $collection->$value);
+            $modelFormatted[$rename] = $this->runFormatters($key, $collection->$value);
         }
 
         return $modelFormatted;
     }
 
     /**
-     * Undot the formatting for the tranformer
-     *
-     * @param array $attributes
-     * @return array
-     */
-    protected function undotAttributes(array $attributes): array
-    {
-        $container = [];
-
-        foreach ($attributes as $attribute) {
-            Arr::set($container, $attribute, Str::afterLast($attribute, '.'));
-        }
-
-        return $container;
-    }
-
-    /**
-     * Gets the formatter
-     *
-     * @return array
-     */
-    protected function getFormatting(): array
-    {
-        $method =  Str::afterLast(Route::currentRouteAction(), '@');
-
-        if (!$method && !$this->formatMethod) {
-            return $this->show();
-        }
-
-        if ($this->formatMethod) {
-            return $this->{$this->formatMethod}();
-        }
-
-        if (!method_exists($this, $method)) {
-            return $this->show();
-        }
-
-        return $this->$method();
-    }
-
-    /**
-     * Renames they key
+     * Keys
      *
      * @param string $key
-     * @return string
+     * @return array
      */
-    protected function renameKey(string $key): string
+    protected function extractRenameAndValue(string $key): array
     {
-        if (array_key_exists($key, $this->rename)) {
-            return $this->rename[$key];
-        }
-
-        return $key;
+        return array_pad(explode(':', $key), 2, $key);
     }
 
     /**
@@ -180,15 +173,5 @@ abstract class BaseTransformer
         }
 
         return $value;
-    }
-
-    /**
-     * Show format
-     *
-     * @return array
-     */
-    protected function show(): array
-    {
-        return [];
     }
 }

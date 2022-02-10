@@ -44,7 +44,7 @@ abstract class BaseRepository
             $user,
             $query,
             $extras
-        )->$method($data['per_page']);
+        )->$method(optional($data)['per_page']);
     }
 
     /**
