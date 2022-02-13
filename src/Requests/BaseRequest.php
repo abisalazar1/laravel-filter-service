@@ -65,8 +65,8 @@ abstract class BaseRequest extends FormRequest
     {
         return [
             'sort' => ['string'],
-            'per_page' => ['integer', 'min:5', 'max:100'],
-            'with_page_count' => ['boolean'],
+            'per_page' => ['integer', 'min:1', 'max:100'],
+            'with_pages' => ['boolean'],
         ];
     }
 

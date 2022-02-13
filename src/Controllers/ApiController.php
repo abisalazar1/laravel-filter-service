@@ -112,7 +112,7 @@ class ApiController
     protected function setData(
         $data,
         string $wrapper = null,
-        string $method = null
+        string $format = null
     ): self {
         $transformer = $this->guessTrasformer();
 
@@ -120,7 +120,7 @@ class ApiController
             $wrapper = $transformer->wrapper;
         }
 
-        $this->data[$wrapper] = $transformer->transformData($data, $method);
+        $this->data[$wrapper] = $transformer->transformData($data, $format);
 
         if ($data instanceof LengthAwarePaginator) {
             $this->pagination['pagination'] = $this->getPagination($data);

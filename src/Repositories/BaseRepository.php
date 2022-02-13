@@ -37,14 +37,14 @@ abstract class BaseRepository
         $query = null,
         array $extras = []
     ) {
-        $method = empty($data['with_page_count']) ? 'paginate' : 'simplePaginate';
+        $paginateMethod = $this->getPaginationMethod($data['with_pages'] ?? null);
 
         return $this->model->filter(
             $data,
             $user,
             $query,
             $extras
-        )->$method(optional($data)['per_page']);
+        )->$paginateMethod($data['per_page'] ?? null);
     }
 
     /**
@@ -173,9 +173,18 @@ abstract class BaseRepository
         }
 
         $model = (string) Str::of(class_basename($this))
-            ->prepend('App\Models\\')
+            ->prepend(config('datafiltering.models_path'))
             ->replace('Repository', '');
 
         return new $model;
+    }
+
+    protected function getPaginationMethod(?bool $withPages = null)
+    {
+        if (is_null($withPages)) {
+            return config('datafiltering.pagination.with_pages') ? 'paginate' : 'simplePaginate';
+        }
+
+        return $withPages ? 'paginate' : 'simplePaginate';
     }
 }
