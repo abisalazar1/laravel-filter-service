@@ -2,6 +2,7 @@
 
 namespace Abix\DataFiltering\Transformers;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -20,10 +21,7 @@ abstract class BaseTransformer
      *
      * @var array
      */
-    protected $format = [
-        '*' =>  [],
-        'index' => []
-    ];
+    protected $formats = [];
 
     /**
      * Rename props
@@ -82,14 +80,18 @@ abstract class BaseTransformer
     {
         $method = Str::afterLast(Route::currentRouteAction(), '@');
 
-        $format = $this->format['*'] ?? [];
+        $mainFormat = $this->formats['*'] ?? [];
 
-        if ($formatMethod && array_key_exists($formatMethod, $this->format)) {
-            return array_merge($this->format[$formatMethod], $format);
+        $requireFormat = $formatMethod ?? $method;
+
+        if (array_key_exists($requireFormat, $this->formats)) {
+            return array_merge($this->formats[$requireFormat], $mainFormat);
         }
+        // If the require format is prefixed by a underscore it wont merge with the main format
+        $requireFormat = '_' . $requireFormat;
 
-        if ($method && array_key_exists($method, $this->format)) {
-            return array_merge($this->format[$method], $format);
+        if (array_key_exists($requireFormat, $this->formats)) {
+            return $this->formats[$requireFormat];
         }
 
         return [];
@@ -133,7 +135,10 @@ abstract class BaseTransformer
                 continue;
             }
 
-            if ($this->isAttributeGuarded($attribute, $currentKey, $collection)) {
+            if (
+                $this->isAttributeGuarded($attribute, $currentKey, $collection) ||
+                Str::startsWith($attribute, ':')
+            ) {
                 continue;
             }
 

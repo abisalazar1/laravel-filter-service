@@ -2,12 +2,21 @@
 
 namespace Abix\DataFiltering\Services\Filters;
 
+use Abix\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 class BaseFilterService
 {
+    /**
+     * Set the transformer
+     *
+     * @var string
+     */
+    protected $transformer = null;
+
     /**
      * Select
      *
@@ -80,21 +89,7 @@ class BaseFilterService
      *
      * @var array
      */
-    protected $guardedMethods = [
-        'setModel',
-        'setUser',
-        'setData',
-        'setQuery',
-        'setExtras',
-        'setSelect',
-        'applySort',
-        'setConditions',
-        'setFilters',
-        'filter',
-        'with',
-        'withCount',
-        'disableConditions',
-    ];
+    protected $guardedMethods = [];
 
     /**
      * Methods that admin users can trigger
@@ -195,6 +190,38 @@ class BaseFilterService
     }
 
     /**
+     * Sets the filters
+     *
+     * @param array $filters
+     * @param array $guarded
+     * @return void
+     */
+    protected function setFilters(
+        array $filters,
+        array $guarded = []
+    ): void {
+        foreach ($filters as $method => $value) {
+            $method = Str::camel($method);
+            if (!in_array($method, $guarded) && method_exists($this, $method)) {
+                $this->$method($value);
+            }
+        }
+    }
+
+    /**
+     * Adds the select
+     *
+     * @param array $value
+     * @return self
+     */
+    public function setSelect(array $value = []): self
+    {
+        $this->select = count($value) ? $value : $this->select;
+
+        return $this;
+    }
+
+    /**
      * Disables the conditions
      *
      * @return self
@@ -215,19 +242,16 @@ class BaseFilterService
     {
         $this->setQuery($this->model->query());
 
-        if (!optional($this->user)->isAdmin()) {
-            $this->guardedMethods = array_merge(
-                $this->guardedMethods,
-                $this->adminMethods
-            );
-        }
-
         if ($this->runConditions) {
             $this->setConditions();
         }
 
         // Apply filters
-        $this->setFilters($this->data, $this->guardedMethods);
+        $this->setFilters($this->data, [
+            ...$this->getBaseGuardedMethods(),
+            ...$this->guardedMethods,
+            ...optional($this->user)->isAdmin() ? [] : $this->adminMethods,
+        ]);
 
         if (!isset($this->data['sort'])) {
             $this->sort($this->defaultSortingColumn);
@@ -235,6 +259,8 @@ class BaseFilterService
 
         // Apply automatic filters
         $this->setFilters($this->autoApply);
+
+        $this->addSelectBasedOnTransformer();
 
         if (count($this->select)) {
             $this->query->select($this->select);
@@ -246,12 +272,12 @@ class BaseFilterService
     /**
      * Search specific table
      *
-     * @param string $serach
+     * @param string $search
      * @return self
      */
-    public function search(string $serach): self
+    public function search(string $search): self
     {
-        $this->query->search($serach);
+        $this->query->search($search);
 
         return $this;
     }
@@ -320,39 +346,7 @@ class BaseFilterService
     }
 
     /**
-     * Sets the filters
-     *
-     * @param array $filters
-     * @param array $guarded
-     * @return void
-     */
-    protected function setFilters(
-        array $filters,
-        array $guarded = []
-    ): void {
-        foreach ($filters as $method => $value) {
-            $method = Str::camel($method);
-            if (!in_array($method, $guarded) && method_exists($this, $method)) {
-                $this->$method($value);
-            }
-        }
-    }
-
-    /**
-     * Adds the select
-     *
-     * @param array $value
-     * @return self
-     */
-    public function setSelect(array $value = []): self
-    {
-        $this->select = count($value) ? $value : $this->select;
-
-        return $this;
-    }
-
-    /**
-     * Sets relations to eagerload
+     * Sets relations to eager load
      *
      * @param array $data
      * @return self
@@ -384,7 +378,7 @@ class BaseFilterService
      * @param mix $value
      * @return boolean
      */
-    public function filterHasValue(string $key, $value): bool
+    public function dataHasValue(string $key, $value): bool
     {
         if (array_key_exists($key, $this->data)) {
             return false;
@@ -399,7 +393,7 @@ class BaseFilterService
      * @param array $keys
      * @return boolean
      */
-    public function filterHasKeys(array $keys = []): bool
+    public function dataHasKeys(array $keys = []): bool
     {
         $dataKeys = array_keys($this->data);
 
@@ -415,5 +409,86 @@ class BaseFilterService
     public function getExtraProperty(string $property): mixed
     {
         return optional($this->extras)[$property];
+    }
+
+    /**
+     * Adds the select based on the transformer
+     *
+     * @return void
+     */
+    protected function addSelectBasedOnTransformer(): void
+    {
+        $transformer = $this->guessTransformer();
+
+        $format = $transformer->getFormatting();
+
+        $this->addSelectAndEagerLoad($this->query, $format);
+    }
+
+    /**
+     * Adds select and eager loads relationship
+     *
+     * @param Builder $query
+     * @param array $format
+     * @return void
+     */
+    protected function addSelectAndEagerLoad($query, $format): void
+    {
+        if (config('apix.auto_select')) {
+            $columns = array_filter($format, function ($item) {
+                return !is_array($item);
+            });
+
+            $query->select(array_map(function ($item) {
+                return Str::replaceFirst(':', '', $item);
+            }, $columns));
+        }
+
+        if (config('apix.auto_eager_load')) {
+            $relations = array_filter($format, function ($item) {
+                return is_array($item);
+            });
+
+            foreach ($relations as $relation => $select) {
+                $query->with($relation, function ($query) use ($select) {
+                    $this->addSelectAndEagerLoad($query, $select);
+                });
+            }
+        }
+    }
+
+    /**
+     * Gets the transformer
+     *
+     * @return BaseTransformer
+     */
+    protected function guessTransformer(): BaseTransformer
+    {
+        if ($this->transformer) {
+            return resolve($this->transformer);
+        }
+
+        $transformer = (string) Str::of(class_basename($this->model))
+            ->prepend(config('apix.paths.transformers'))
+            ->append('Transformer');
+
+
+        return resolve($transformer);
+    }
+
+    /**
+     * Get base guarded methods
+     *
+     * @return array
+     */
+    protected function getBaseGuardedMethods(): array
+    {
+        $class = new ReflectionClass(BaseFilterService::class);
+
+        return array_filter(array_map(function ($method) {
+            return $method->getName();
+        }, $class->getMethods()), function ($item) {
+            return !in_array($item, ['sort', 'search']);
+        });
     }
 }

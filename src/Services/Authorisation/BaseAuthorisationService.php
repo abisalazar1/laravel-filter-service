@@ -2,9 +2,9 @@
 
 namespace Abix\DataFiltering\Services\Authorisation;
 
+use Abix\DataFiltering\Exceptions\AuthorisationException;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
-use Abix\DataFiltering\Exceptions\AuthorisationException;
 
 class BaseAuthorisationService
 {
@@ -63,9 +63,9 @@ class BaseAuthorisationService
      * @param User $user
      * @return self
      */
-    public function setUser(?User $authenticatable)
+    public function setUser(?User $user)
     {
-        $this->authenticatable = $authenticatable;
+        $this->user = $user;
 
         return $this;
     }
@@ -90,7 +90,7 @@ class BaseAuthorisationService
      */
     public function passwordVerification(string $password): self
     {
-        if (!Hash::check($password, optional($this->authenticatable)->password)) {
+        if (!Hash::check($password, optional($this->user)->password)) {
             $this->error('The provided credentials are incorrect.');
         }
 

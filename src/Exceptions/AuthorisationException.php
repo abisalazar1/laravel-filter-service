@@ -50,9 +50,10 @@ class AuthorisationException extends Exception
 
         if (!$request->acceptsJson()) {
             abort_if(!$this->view, $this->code, $message);
-            return view($this->view)
-                ->withCode($this->code)
-                ->withMessage($message);
+            return view($this->view, [
+                'code' => $this->code,
+                'message' => $this->message,
+            ]);
         }
 
         return response([

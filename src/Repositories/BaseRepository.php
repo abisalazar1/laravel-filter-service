@@ -173,7 +173,7 @@ abstract class BaseRepository
         }
 
         $model = (string) Str::of(class_basename($this))
-            ->prepend(config('datafiltering.models_path'))
+            ->prepend(config('apix.paths.models'))
             ->replace('Repository', '');
 
         return new $model;
@@ -182,7 +182,7 @@ abstract class BaseRepository
     protected function getPaginationMethod(?bool $withPages = null)
     {
         if (is_null($withPages)) {
-            return config('datafiltering.pagination.with_pages') ? 'paginate' : 'simplePaginate';
+            return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';
         }
 
         return $withPages ? 'paginate' : 'simplePaginate';

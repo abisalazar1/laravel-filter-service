@@ -2,12 +2,12 @@
 
 namespace Abix\DataFiltering\Controllers;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use Abix\DataFiltering\Repositories\BaseRepository;
 use Abix\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class ApiController
 {
@@ -114,7 +114,7 @@ class ApiController
         string $wrapper = null,
         string $format = null
     ): self {
-        $transformer = $this->guessTrasformer();
+        $transformer = $this->guessTransformer();
 
         if (!$wrapper) {
             $wrapper = $transformer->wrapper;
@@ -196,14 +196,14 @@ class ApiController
      *
      * @return BaseTransformer
      */
-    protected function guessTrasformer(): BaseTransformer
+    protected function guessTransformer(): BaseTransformer
     {
         if ($this->transformer) {
             return resolve($this->transformer);
         }
 
         $transformer = (string) Str::of(class_basename($this))
-            ->prepend('App\Transformers\\')
+            ->prepend(config('apix.paths.transformers'))
             ->replace('Controller', 'Transformer');
 
         return resolve($transformer);
@@ -221,7 +221,7 @@ class ApiController
         }
 
         $repository = (string) Str::of(class_basename($this))
-            ->prepend('App\Repositories\\')
+            ->prepend(config('apix.paths.repositories'))
             ->replace('Controller', 'Repository');
 
         return resolve($repository);
