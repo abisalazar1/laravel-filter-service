@@ -266,7 +266,11 @@ class BaseFilterService
             $this->query->select($this->select);
         }
 
-        return $this->query;
+        $paginateMethod = $this->getPaginationMethod(
+            $this->getDataValue('with_pages')
+        );
+
+        return $this->query->$paginateMethod($this->getPerPage());
     }
 
     /**
@@ -375,7 +379,7 @@ class BaseFilterService
      * Checks if value exists
      *
      * @param string $key
-     * @param mix $value
+     * @param mixed $value
      * @return boolean
      */
     public function dataHasValue(string $key, $value): bool
@@ -385,6 +389,21 @@ class BaseFilterService
         }
 
         return $this->data[$key] === $value;
+    }
+
+    /**
+     * Gets data value
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getDataValue(string $key, $default = null)
+    {
+        if (!$this->dataHasKeys([$key])) {
+            return $default;
+        }
+
+        return $this->data[$key];
     }
 
     /**
@@ -439,6 +458,10 @@ class BaseFilterService
                 return !is_array($item);
             });
 
+            if (!count($columns)) {
+                $columns = ['*'];
+            }
+
             $query->select(array_map(function ($item) {
                 return Str::replaceFirst(':', '', $item);
             }, $columns));
@@ -490,5 +513,40 @@ class BaseFilterService
         }, $class->getMethods()), function ($item) {
             return !in_array($item, ['sort', 'search']);
         });
+    }
+
+    /**
+     * Get
+     *
+     * @param boolean|null $withPages
+     * @return string
+     */
+    protected function getPaginationMethod(?bool $withPages = null): string
+    {
+        if (is_null($withPages)) {
+            return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';
+        }
+
+        return $withPages ? 'paginate' : 'simplePaginate';
+    }
+
+    /**
+     * Get page
+     *
+     * @return int
+     */
+    protected function getPage(): int
+    {
+        return $this->getDataValue('page', 1);
+    }
+
+    /**
+     * Gets per page
+     *
+     * @return int
+     */
+    protected function getPerPage(): int
+    {
+        return $this->getDataValue('per_page', $this->model->getPerPage());
     }
 }

@@ -85,7 +85,10 @@ abstract class BaseTransformer
         $requireFormat = $formatMethod ?? $method;
 
         if (array_key_exists($requireFormat, $this->formats)) {
-            return array_merge($this->formats[$requireFormat], $mainFormat);
+            return array_merge(
+                $mainFormat,
+                $this->formats[$requireFormat]
+            );
         }
         // If the require format is prefixed by a underscore it wont merge with the main format
         $requireFormat = '_' . $requireFormat;
@@ -94,7 +97,7 @@ abstract class BaseTransformer
             return $this->formats[$requireFormat];
         }
 
-        return [];
+        return $mainFormat;
     }
 
     /**

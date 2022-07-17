@@ -219,7 +219,6 @@ class ApiController
         if ($this->repository) {
             return resolve($this->repository);
         }
-
         $repository = (string) Str::of(class_basename($this))
             ->prepend(config('apix.paths.repositories'))
             ->replace('Controller', 'Repository');

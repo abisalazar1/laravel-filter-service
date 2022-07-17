@@ -37,14 +37,12 @@ abstract class BaseRepository
         $query = null,
         array $extras = []
     ) {
-        $paginateMethod = $this->getPaginationMethod($data['with_pages'] ?? null);
-
         return $this->model->filter(
             $data,
             $user,
             $query,
             $extras
-        )->$paginateMethod($data['per_page'] ?? null);
+        );
     }
 
     /**
@@ -177,14 +175,5 @@ abstract class BaseRepository
             ->replace('Repository', '');
 
         return new $model;
-    }
-
-    protected function getPaginationMethod(?bool $withPages = null)
-    {
-        if (is_null($withPages)) {
-            return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';
-        }
-
-        return $withPages ? 'paginate' : 'simplePaginate';
     }
 }

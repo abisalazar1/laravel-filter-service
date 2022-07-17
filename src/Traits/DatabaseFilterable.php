@@ -2,9 +2,9 @@
 
 namespace Abix\DataFiltering\Traits;
 
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Database\Eloquent\Builder;
 use Abix\DataFiltering\Services\Filters\BaseFilterService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\User;
 
 trait DatabaseFilterable
 {
@@ -14,14 +14,14 @@ trait DatabaseFilterable
      * @param array $data
      * @param User|null $user
      * @param Builder $query
-     * @return Builder
+     * @return mixed
      */
     public function filter(
         array $data,
         ?User $user,
         $query = null,
         array $extras = []
-    ): Builder {
+    ) {
         $filterService = BaseFilterService::class;
 
         if (property_exists($this, 'defaultFilterService')) {
