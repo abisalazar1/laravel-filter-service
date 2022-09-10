@@ -11,9 +11,9 @@ trait DatabaseFilterable
     /**
      * Apply filters
      *
-     * @param array $data
-     * @param User|null $user
-     * @param Builder $query
+     * @param  array  $data
+     * @param  User|null  $user
+     * @param  Builder  $query
      * @return mixed
      */
     public function filter(
@@ -40,8 +40,8 @@ trait DatabaseFilterable
     /**
      * Search
      *
-     * @param Builder $builder
-     * @param string $search
+     * @param  Builder  $builder
+     * @param  string  $search
      * @return Builder
      */
     public function scopeSearch(Builder $builder, string $search)
@@ -52,7 +52,7 @@ trait DatabaseFilterable
 
         foreach ($terms as $term) {
             foreach ($columns as $column) {
-                $builder->where($column, 'LIKE', '%' . $term . '%');
+                $builder->where($column, 'LIKE', '%'.$term.'%');
             }
         }
 

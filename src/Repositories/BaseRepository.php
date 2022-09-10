@@ -26,9 +26,9 @@ abstract class BaseRepository
     /**
      * Index
      *
-     * @param array $data
-     * @param User|null $user
-     * @param Builder $query
+     * @param  array  $data
+     * @param User|null  $user
+     * @param Builder  $query
      * @return Paginate
      */
     public function index(
@@ -48,7 +48,7 @@ abstract class BaseRepository
     /**
      * Gets a single item
      *
-     * @param mix $id
+     * @param  mix  $id
      * @return Model
      */
     public function get($id)
@@ -59,7 +59,7 @@ abstract class BaseRepository
     /**
      * Gets run before the model is created
      *
-     * @param array $attributes
+     * @param  array  $attributes
      * @return void
      */
     protected function beforeCreate(array &$attributes = [])
@@ -86,8 +86,8 @@ abstract class BaseRepository
     /**
      * After created
      *
-     * @param Model $model
-     * @param array $attributes
+     * @param  Model  $model
+     * @param  array  $attributes
      * @return void
      */
     protected function afterCreated(
@@ -99,8 +99,8 @@ abstract class BaseRepository
     /**
      * Runs before model gets updated
      *
-     * @param array $attributes
-     * @param Model $model
+     * @param  array  $attributes
+     * @param  Model  $model
      * @return void
      */
     protected function beforeUpdate(
@@ -112,13 +112,13 @@ abstract class BaseRepository
     /**
      * Updates a model
      *
-     * @param mix $id
-     * @param array $attributes
+     * @param  mix  $id
+     * @param  array  $attributes
      * @return Model
      */
     public function update($model, array $attributes)
     {
-        if (!$model instanceof Model) {
+        if (! $model instanceof Model) {
             $model = $this->get($model);
         }
 
@@ -134,8 +134,8 @@ abstract class BaseRepository
     /**
      * Runs after the model is updated
      *
-     * @param Model $model
-     * @param array $attributes
+     * @param  Model  $model
+     * @param  array  $attributes
      * @return void
      */
     protected function afterUpdated(
@@ -147,12 +147,12 @@ abstract class BaseRepository
     /**
      * Deletes a record
      *
-     * @param mix $id
+     * @param  mix  $id
      * @return bool
      */
     public function delete($id)
     {
-        if (!$id instanceof Model) {
+        if (! $id instanceof Model) {
             $id = $this->get($id);
         }
 
@@ -167,13 +167,13 @@ abstract class BaseRepository
     protected function guessModel(): Model
     {
         if ($this->model) {
-            return new $this->model;
+            return new $this->model();
         }
 
         $model = (string) Str::of(class_basename($this))
             ->prepend(config('apix.paths.models'))
             ->replace('Repository', '');
 
-        return new $model;
+        return new $model();
     }
 }

@@ -25,8 +25,8 @@ class AuthorisationException extends Exception
     /**
      * Constructor
      *
-     * @param string|null  $message
-     * @param integer|null $code
+     * @param  string|null  $message
+     * @param  int|null  $code
      */
     public function __construct(
         ?string $message = null,
@@ -48,8 +48,9 @@ class AuthorisationException extends Exception
     {
         $message = $this->getErrorMessage($this->message);
 
-        if (!$request->acceptsJson()) {
-            abort_if(!$this->view, $this->code, $message);
+        if (! $request->acceptsJson()) {
+            abort_if(! $this->view, $this->code, $message);
+
             return view($this->view, [
                 'code' => $this->code,
                 'message' => $this->message,
@@ -66,7 +67,7 @@ class AuthorisationException extends Exception
     /**
      * Gets the status text
      *
-     * @param  string $message
+     * @param  string  $message
      * @return string
      */
     public function getErrorMessage(?string $message = null): string

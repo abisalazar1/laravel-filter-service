@@ -47,7 +47,7 @@ class BaseAuthorisationService
     /**
      * Properties
      *
-     * @param array $properties
+     * @param  array  $properties
      * @return self
      */
     public function setProperties(array $properties = []): self
@@ -60,7 +60,7 @@ class BaseAuthorisationService
     /**
      * Sets the model to authenticate
      *
-     * @param User $user
+     * @param  User  $user
      * @return self
      */
     public function setUser(?User $user)
@@ -85,12 +85,12 @@ class BaseAuthorisationService
     /**
      * Verifies that the authenticatable model has the correct password
      *
-     * @param string $password
+     * @param  string  $password
      * @return self
      */
-    public function passwordVerification(string $password): self
+    public function passwordVerification(?string $password): self
     {
-        if (!Hash::check($password, optional($this->user)->password)) {
+        if (! $password || ! $this->user || ! Hash::check($password, $this->user->password)) {
             $this->error('The provided credentials are incorrect.');
         }
 
@@ -110,7 +110,7 @@ class BaseAuthorisationService
     /**
      * Gets a property
      *
-     * @param string $property
+     * @param  string  $property
      * @return mixed
      */
     public function getProperty(string $property): mixed
@@ -121,7 +121,7 @@ class BaseAuthorisationService
     /**
      * Checks the validation has passed
      *
-     * @return boolean
+     * @return bool
      */
     public function isValid(): bool
     {
@@ -131,9 +131,10 @@ class BaseAuthorisationService
     /**
      * Throws the exception or adds the error to the bag
      *
-     * @param string $message
-     * @throws AuthorisationException
+     * @param  string  $message
      * @return void
+     *
+     * @throws AuthorisationException
      */
     protected function error(string $message): void
     {

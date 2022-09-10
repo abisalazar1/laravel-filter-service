@@ -9,13 +9,6 @@ use Illuminate\Support\Str;
 abstract class BaseRequest extends FormRequest
 {
     /**
-     * Rules to append
-     *
-     * @var array
-     */
-    protected $appendRules = [];
-
-    /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
@@ -46,9 +39,9 @@ abstract class BaseRequest extends FormRequest
             $rules = $this->$method();
         }
 
-        if (array_key_exists($method, $this->appendRules)) {
+        if (array_key_exists($this->getRouteAction(), $this->actionsRules())) {
             $rules = array_merge(
-                $this->appendRules[$method],
+                $this->getActionRule($this->getRouteAction()),
                 $rules
             );
         }
@@ -73,13 +66,39 @@ abstract class BaseRequest extends FormRequest
     /**
      * Guess the method to trigger
      *
-     * @param string $ending
+     * @param  string  $ending
      * @return string
      */
     protected function guessMethodFor(string $ending): string
     {
-        return (string) Str::of(Route::currentRouteAction())
-            ->afterLast('@')
-            ->append($ending);
+        return $this->getRouteAction().$ending;
+    }
+
+    /**
+     * Action
+     *
+     * @return string
+     */
+    protected function getRouteAction(): string
+    {
+        return (string) Str::of(Route::currentRouteAction())->afterLast('@');
+    }
+
+    /**
+     * All rules
+     *
+     * @return array
+     */
+    abstract public function actionsRules(): array;
+
+    /**
+     * Gets specific action rules
+     *
+     * @param  string  $action
+     * @return array
+     */
+    protected function getActionRule(string $action): array
+    {
+        return $this->actionsRules()[$action] ?? [];
     }
 }

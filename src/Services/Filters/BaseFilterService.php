@@ -115,7 +115,7 @@ class BaseFilterService
     /**
      * Sets the user
      *
-     * @param User|null $user
+     * @param  User|null  $user
      * @return self
      */
     public function setUser(?User $user): self
@@ -128,7 +128,7 @@ class BaseFilterService
     /**
      * Sets the data
      *
-     * @param array $data
+     * @param  array  $data
      * @return self
      */
     public function setData(array $data = []): self
@@ -141,7 +141,7 @@ class BaseFilterService
     /**
      * Sets the data
      *
-     * @param array $data
+     * @param  array  $data
      * @return self
      */
     public function setExtras(array $extras = []): self
@@ -154,12 +154,12 @@ class BaseFilterService
     /**
      * Sets the query
      *
-     * @param Builder $query
+     * @param  Builder  $query
      * @return self
      */
     public function setQuery($query): self
     {
-        if (!$this->query) {
+        if (! $this->query) {
             $this->query = $query;
         }
 
@@ -169,7 +169,7 @@ class BaseFilterService
     /**
      * Sets the model
      *
-     * @param Model $model
+     * @param  Model  $model
      * @return self
      */
     public function setModel(Model $model): self
@@ -192,8 +192,8 @@ class BaseFilterService
     /**
      * Sets the filters
      *
-     * @param array $filters
-     * @param array $guarded
+     * @param  array  $filters
+     * @param  array  $guarded
      * @return void
      */
     protected function setFilters(
@@ -202,7 +202,7 @@ class BaseFilterService
     ): void {
         foreach ($filters as $method => $value) {
             $method = Str::camel($method);
-            if (!in_array($method, $guarded) && method_exists($this, $method)) {
+            if (! in_array($method, $guarded) && method_exists($this, $method)) {
                 $this->$method($value);
             }
         }
@@ -211,7 +211,7 @@ class BaseFilterService
     /**
      * Adds the select
      *
-     * @param array $value
+     * @param  array  $value
      * @return self
      */
     public function setSelect(array $value = []): self
@@ -253,7 +253,7 @@ class BaseFilterService
             ...optional($this->user)->isAdmin() ? [] : $this->adminMethods,
         ]);
 
-        if (!isset($this->data['sort'])) {
+        if (! isset($this->data['sort'])) {
             $this->sort($this->defaultSortingColumn);
         }
 
@@ -276,7 +276,7 @@ class BaseFilterService
     /**
      * Search specific table
      *
-     * @param string $search
+     * @param  string  $search
      * @return self
      */
     public function search(string $search): self
@@ -289,7 +289,7 @@ class BaseFilterService
     /**
      * Sorting
      *
-     * @param string|array $sort
+     * @param  string|array  $sort
      * @return self
      */
     public function sort($sortValues): self
@@ -306,7 +306,7 @@ class BaseFilterService
     /**
      * Apply sort
      *
-     * @param string $sort
+     * @param  string  $sort
      * @return self
      */
     public function applySort(string $sort): self
@@ -319,7 +319,7 @@ class BaseFilterService
 
         $allowedColumns = array_merge($this->sortColumns, $this->customSortColumns);
 
-        if (!in_array($originalColumn, $allowedColumns)) {
+        if (! in_array($originalColumn, $allowedColumns)) {
             [$column, $newOrder] = $this->getSortValues($this->defaultSortingColumn);
         }
 
@@ -329,7 +329,7 @@ class BaseFilterService
             );
         }
 
-        if (!$originalOrder && isset($newOrder)) {
+        if (! $originalOrder && isset($newOrder)) {
             $order = $newOrder;
         }
 
@@ -341,7 +341,7 @@ class BaseFilterService
     /**
      * Extract values
      *
-     * @param string $sort
+     * @param  string  $sort
      * @return array
      */
     private function getSortValues(string $sort): array
@@ -352,7 +352,7 @@ class BaseFilterService
     /**
      * Sets relations to eager load
      *
-     * @param array $data
+     * @param  array  $data
      * @return self
      */
     protected function with(array $data): self
@@ -365,7 +365,7 @@ class BaseFilterService
     /**
      * Sets count for relationships
      *
-     * @param array $data
+     * @param  array  $data
      * @return self
      */
     protected function withCount(array $data): self
@@ -378,9 +378,9 @@ class BaseFilterService
     /**
      * Checks if value exists
      *
-     * @param string $key
-     * @param mixed $value
-     * @return boolean
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return bool
      */
     public function dataHasValue(string $key, $value): bool
     {
@@ -394,12 +394,12 @@ class BaseFilterService
     /**
      * Gets data value
      *
-     * @param string $key
+     * @param  string  $key
      * @return mixed
      */
     public function getDataValue(string $key, $default = null)
     {
-        if (!$this->dataHasKeys([$key])) {
+        if (! $this->dataHasKeys([$key])) {
             return $default;
         }
 
@@ -409,8 +409,8 @@ class BaseFilterService
     /**
      * Checks if keys exists
      *
-     * @param array $keys
-     * @return boolean
+     * @param  array  $keys
+     * @return bool
      */
     public function dataHasKeys(array $keys = []): bool
     {
@@ -422,7 +422,7 @@ class BaseFilterService
     /**
      * Gets the property
      *
-     * @param string $property
+     * @param  string  $property
      * @return mixed
      */
     public function getExtraProperty(string $property): mixed
@@ -447,18 +447,18 @@ class BaseFilterService
     /**
      * Adds select and eager loads relationship
      *
-     * @param Builder $query
-     * @param array $format
+     * @param  Builder  $query
+     * @param  array  $format
      * @return void
      */
     protected function addSelectAndEagerLoad($query, $format): void
     {
         if (config('apix.auto_select')) {
             $columns = array_filter($format, function ($item) {
-                return !is_array($item);
+                return ! is_array($item);
             });
 
-            if (!count($columns)) {
+            if (! count($columns)) {
                 $columns = ['*'];
             }
 
@@ -495,7 +495,6 @@ class BaseFilterService
             ->prepend(config('apix.paths.transformers'))
             ->append('Transformer');
 
-
         return resolve($transformer);
     }
 
@@ -511,14 +510,14 @@ class BaseFilterService
         return array_filter(array_map(function ($method) {
             return $method->getName();
         }, $class->getMethods()), function ($item) {
-            return !in_array($item, ['sort', 'search']);
+            return ! in_array($item, ['sort', 'search']);
         });
     }
 
     /**
      * Get
      *
-     * @param boolean|null $withPages
+     * @param  bool|null  $withPages
      * @return string
      */
     protected function getPaginationMethod(?bool $withPages = null): string

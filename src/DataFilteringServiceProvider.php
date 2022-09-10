@@ -14,7 +14,7 @@ class DataFilteringServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/config/apix.php' => config_path('apix.php'),
+            __DIR__.'/config/apix.php' => config_path('apix.php'),
         ]);
     }
 
@@ -26,7 +26,7 @@ class DataFilteringServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/config/apix.php',
+            __DIR__.'/config/apix.php',
             'apix'
         );
     }
