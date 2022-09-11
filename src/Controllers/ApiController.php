@@ -21,7 +21,7 @@ class ApiController
     /**
      * Status Code
      *
-     * @var integer
+     * @var int
      */
     protected $code = 200;
 
@@ -71,7 +71,7 @@ class ApiController
     /**
      * Sets http code
      *
-     * @param  integer $code
+     * @param  int  $code
      * @param  string  $message
      * @return self
      */
@@ -91,7 +91,7 @@ class ApiController
     /**
      * Sets the transformer
      *
-     * @param string $transformer
+     * @param  string  $transformer
      * @return self
      */
     protected function setTransformer(string $transformer): self
@@ -104,9 +104,9 @@ class ApiController
     /**
      * Sets the main data
      *
-     * @param Collection|Model $data
-     * @param string $wrapper
-     * @param string $method
+     * @param  Collection|Model  $data
+     * @param  string  $wrapper
+     * @param  string  $method
      * @return self
      */
     protected function setData(
@@ -116,7 +116,7 @@ class ApiController
     ): self {
         $transformer = $this->guessTransformer();
 
-        if (!$wrapper) {
+        if (! $wrapper) {
             $wrapper = $transformer->wrapper;
         }
 
@@ -132,8 +132,8 @@ class ApiController
     /**
      * Sends the response
      *
-     * @param array|null $response
-     * @param boolean $overide
+     * @param  array|null  $response
+     * @param  bool  $overide
      * @return JsonResponse
      */
     protected function respond(
@@ -174,7 +174,7 @@ class ApiController
     /**
      * Gets the pagination
      *
-     * @param LengthAwarePaginator $data
+     * @param  LengthAwarePaginator  $data
      * @return array
      */
     protected function getPagination(LengthAwarePaginator $data): array

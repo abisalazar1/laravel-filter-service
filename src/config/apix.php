@@ -13,7 +13,7 @@ return [
     /**
      * It will automatically use select statement based on the transformer
      */
-    'auto_select' => true,
+    'auto_select' => false,
 
     /**
      * It will eager load the data when using the filtering service

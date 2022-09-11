@@ -27,8 +27,8 @@ abstract class BaseRepository
      * Index
      *
      * @param  array  $data
-     * @param User|null  $user
-     * @param Builder  $query
+     * @param  User|null  $user
+     * @param  Builder  $query
      * @return Paginate
      */
     public function index(
@@ -69,7 +69,7 @@ abstract class BaseRepository
     /**
      * Creates a record
      *
-     * @param array $attributes
+     * @param  array  $attributes
      * @return Model
      */
     public function create(array $attributes)

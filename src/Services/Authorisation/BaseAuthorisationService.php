@@ -83,6 +83,23 @@ class BaseAuthorisationService
     }
 
     /**
+     * Check that if model belongs to user owner
+     *
+     * @param  string|null  $property
+     * @return self
+     */
+    public function doesItBelongToUser(?string $property = null)
+    {
+        $property = $this->getProperty($property);
+
+        if (! $property->user_id || $property->user_id !== $this->user->id) {
+            $this->error('Item does not belong to this user.');
+        }
+
+        return $this;
+    }
+
+    /**
      * Verifies that the authenticatable model has the correct password
      *
      * @param  string  $password
@@ -92,6 +109,20 @@ class BaseAuthorisationService
     {
         if (! $password || ! $this->user || ! Hash::check($password, $this->user->password)) {
             $this->error('The provided credentials are incorrect.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Requires a logged in user
+     *
+     * @return self
+     */
+    public function requireUser(): self
+    {
+        if (! auth()->check()) {
+            $this->error('Please login into your account.');
         }
 
         return $this;
