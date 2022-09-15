@@ -150,7 +150,7 @@ abstract class BaseRepository
      * @param  mix  $id
      * @return bool
      */
-    public function delete($id)
+    public function delete(mixed $id)
     {
         if (! $id instanceof Model) {
             $id = $this->get($id);

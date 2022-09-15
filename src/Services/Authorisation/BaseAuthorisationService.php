@@ -40,9 +40,43 @@ class BaseAuthorisationService
     /**
      * Sets current property
      *
-     * @var Model
+     * @var string
      */
-    protected $currentProperty = null;
+    protected $mainProperty = null;
+
+    /**
+     * Gets a property
+     *
+     * @param  string  $property
+     * @return mixed
+     */
+    public function getProperty(string $property): mixed
+    {
+        return $this->properties[$property] ?? null;
+    }
+
+    /**
+     * Gets current property
+     *
+     * @return mixed
+     */
+    public function getMainProperty(): mixed
+    {
+        return $this->properties[$this->mainProperty];
+    }
+
+    /**
+     * Sets current property
+     *
+     * @param  mixed  $property
+     * @return self
+     */
+    public function setMainProperty(mixed $property): self
+    {
+        $this->properties[$this->mainProperty] = $property;
+
+        return $this;
+    }
 
     /**
      * Properties
@@ -63,7 +97,7 @@ class BaseAuthorisationService
      * @param  User  $user
      * @return self
      */
-    public function setUser(?User $user)
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 
@@ -88,11 +122,15 @@ class BaseAuthorisationService
      * @param  string|null  $property
      * @return self
      */
-    public function doesItBelongToUser(?string $property = null)
+    public function doesItBelongToUser(?string $property = null): self
     {
-        $property = $this->getProperty($property);
+        $property = $property ? $this->getProperty($property) : $this->getMainProperty();
 
-        if (! $property->user_id || $property->user_id !== $this->user->id) {
+        if (! $this->user) {
+            $this->error('Sorry user has not been set.');
+        }
+
+        if (! $property?->user_id || $property?->user_id !== $this->user->id) {
             $this->error('Item does not belong to this user.');
         }
 
@@ -122,7 +160,7 @@ class BaseAuthorisationService
     public function requireUser(): self
     {
         if (! auth()->check()) {
-            $this->error('Please login into your account.');
+            $this->error('Not authenticated.', 401);
         }
 
         return $this;
@@ -136,17 +174,6 @@ class BaseAuthorisationService
     public function getErrors(): array
     {
         return $this->errors;
-    }
-
-    /**
-     * Gets a property
-     *
-     * @param  string  $property
-     * @return mixed
-     */
-    public function getProperty(string $property): mixed
-    {
-        return $this->properties[$property] ?? null;
     }
 
     /**
@@ -167,7 +194,7 @@ class BaseAuthorisationService
      *
      * @throws AuthorisationException
      */
-    protected function error(string $message): void
+    protected function error(string $message, int $code = 403): void
     {
         if ($this->skipExceptions) {
             $this->errors[] = $message;
@@ -175,6 +202,6 @@ class BaseAuthorisationService
             return;
         }
 
-        throw new AuthorisationException($message);
+        throw new AuthorisationException($message, $code);
     }
 }
