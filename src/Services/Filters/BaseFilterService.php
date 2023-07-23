@@ -82,7 +82,7 @@ class BaseFilterService
      *
      * @var string
      */
-    protected $defaultSortingColumn = ['id,desc', 'created_at'];
+    protected $defaultSortingColumn = ['id,desc'];
 
     /**
      * Methods that cannot be triggered by the data
@@ -114,9 +114,6 @@ class BaseFilterService
 
     /**
      * Sets the user
-     *
-     * @param  User|null  $user
-     * @return self
      */
     public function setUser(?User $user): self
     {
@@ -127,9 +124,6 @@ class BaseFilterService
 
     /**
      * Sets the data
-     *
-     * @param  array  $data
-     * @return self
      */
     public function setData(array $data = []): self
     {
@@ -142,7 +136,6 @@ class BaseFilterService
      * Sets the data
      *
      * @param  array  $data
-     * @return self
      */
     public function setExtras(array $extras = []): self
     {
@@ -155,7 +148,6 @@ class BaseFilterService
      * Sets the query
      *
      * @param  Builder  $query
-     * @return self
      */
     public function setQuery($query): self
     {
@@ -168,9 +160,6 @@ class BaseFilterService
 
     /**
      * Sets the model
-     *
-     * @param  Model  $model
-     * @return self
      */
     public function setModel(Model $model): self
     {
@@ -181,8 +170,6 @@ class BaseFilterService
 
     /**
      * Sets conditions
-     *
-     * @return self
      */
     public function setConditions(): self
     {
@@ -191,10 +178,6 @@ class BaseFilterService
 
     /**
      * Sets the filters
-     *
-     * @param  array  $filters
-     * @param  array  $guarded
-     * @return void
      */
     protected function setFilters(
         array $filters,
@@ -210,9 +193,6 @@ class BaseFilterService
 
     /**
      * Adds the select
-     *
-     * @param  array  $value
-     * @return self
      */
     public function setSelect(array $value = []): self
     {
@@ -223,8 +203,6 @@ class BaseFilterService
 
     /**
      * Disables the conditions
-     *
-     * @return self
      */
     public function disableConditions(): self
     {
@@ -241,6 +219,12 @@ class BaseFilterService
     public function filter()
     {
         $this->setQuery($this->model->query());
+
+        $this->addSelectBasedOnTransformer();
+
+        if (count($this->select)) {
+            $this->query->select($this->select);
+        }
 
         if ($this->runConditions) {
             $this->setConditions();
@@ -260,12 +244,6 @@ class BaseFilterService
         // Apply automatic filters
         $this->setFilters($this->autoApply);
 
-        $this->addSelectBasedOnTransformer();
-
-        if (count($this->select)) {
-            $this->query->select($this->select);
-        }
-
         $paginateMethod = $this->getPaginationMethod(
             $this->getDataValue('with_pages')
         );
@@ -275,9 +253,6 @@ class BaseFilterService
 
     /**
      * Search specific table
-     *
-     * @param  string  $search
-     * @return self
      */
     public function search(string $search): self
     {
@@ -290,7 +265,6 @@ class BaseFilterService
      * Sorting
      *
      * @param  string|array  $sort
-     * @return self
      */
     public function sort($sortValues): self
     {
@@ -305,9 +279,6 @@ class BaseFilterService
 
     /**
      * Apply sort
-     *
-     * @param  string  $sort
-     * @return self
      */
     public function applySort(string $sort): self
     {
@@ -340,9 +311,6 @@ class BaseFilterService
 
     /**
      * Extract values
-     *
-     * @param  string  $sort
-     * @return array
      */
     private function getSortValues(string $sort): array
     {
@@ -351,9 +319,6 @@ class BaseFilterService
 
     /**
      * Sets relations to eager load
-     *
-     * @param  array  $data
-     * @return self
      */
     protected function with(array $data): self
     {
@@ -364,9 +329,6 @@ class BaseFilterService
 
     /**
      * Sets count for relationships
-     *
-     * @param  array  $data
-     * @return self
      */
     protected function withCount(array $data): self
     {
@@ -378,9 +340,7 @@ class BaseFilterService
     /**
      * Checks if value exists
      *
-     * @param  string  $key
      * @param  mixed  $value
-     * @return bool
      */
     public function dataHasValue(string $key, $value): bool
     {
@@ -394,7 +354,6 @@ class BaseFilterService
     /**
      * Gets data value
      *
-     * @param  string  $key
      * @return mixed
      */
     public function getDataValue(string $key, $default = null)
@@ -408,9 +367,6 @@ class BaseFilterService
 
     /**
      * Checks if keys exists
-     *
-     * @param  array  $keys
-     * @return bool
      */
     public function dataHasKeys(array $keys = []): bool
     {
@@ -421,9 +377,6 @@ class BaseFilterService
 
     /**
      * Gets the property
-     *
-     * @param  string  $property
-     * @return mixed
      */
     public function getExtraProperty(string $property): mixed
     {
@@ -432,8 +385,6 @@ class BaseFilterService
 
     /**
      * Adds the select based on the transformer
-     *
-     * @return void
      */
     protected function addSelectBasedOnTransformer(): void
     {
@@ -449,7 +400,6 @@ class BaseFilterService
      *
      * @param  Builder  $query
      * @param  array  $format
-     * @return void
      */
     protected function addSelectAndEagerLoad($query, $format): void
     {
@@ -462,17 +412,28 @@ class BaseFilterService
                 $columns = ['*'];
             }
 
-            $query->select(array_map(function ($item) {
-                return Str::replaceFirst(':', '', $item);
-            }, $columns));
+            $query->select(
+                array_filter(array_map(function ($item) {
+                    return Str::replaceFirst(
+                        config('apix.transformers.prefixes.hidden_attributes'),
+                        '',
+                        $item
+                    );
+                }, $columns), function ($item) {
+                    return ! Str::startsWith(
+                        $item,
+                        config('apix.transformers.prefixes.custom_attributes')
+                    );
+                })
+            );
         }
 
         if (config('apix.auto_eager_load')) {
-            $relations = array_filter($format, function ($item) {
-                return is_array($item);
-            });
+            foreach ($format as $relation => $select) {
+                if (! is_array($select)) {
+                    continue;
+                }
 
-            foreach ($relations as $relation => $select) {
                 $query->with($relation, function ($query) use ($select) {
                     $this->addSelectAndEagerLoad($query, $select);
                 });
@@ -482,8 +443,6 @@ class BaseFilterService
 
     /**
      * Gets the transformer
-     *
-     * @return BaseTransformer
      */
     protected function guessTransformer(): BaseTransformer
     {
@@ -500,8 +459,6 @@ class BaseFilterService
 
     /**
      * Get base guarded methods
-     *
-     * @return array
      */
     protected function getBaseGuardedMethods(): array
     {
@@ -516,11 +473,8 @@ class BaseFilterService
 
     /**
      * Get
-     *
-     * @param  bool|null  $withPages
-     * @return string
      */
-    protected function getPaginationMethod(?bool $withPages = null): string
+    protected function getPaginationMethod(bool $withPages = null): string
     {
         if (is_null($withPages)) {
             return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';
@@ -531,8 +485,6 @@ class BaseFilterService
 
     /**
      * Get page
-     *
-     * @return int
      */
     protected function getPage(): int
     {
@@ -541,8 +493,6 @@ class BaseFilterService
 
     /**
      * Gets per page
-     *
-     * @return int
      */
     protected function getPerPage(): int
     {

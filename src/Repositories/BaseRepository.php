@@ -26,14 +26,12 @@ abstract class BaseRepository
     /**
      * Index
      *
-     * @param  array  $data
-     * @param  User|null  $user
      * @param  Builder  $query
      * @return Paginate
      */
     public function index(
         array $data,
-        ?User $user = null,
+        User $user = null,
         $query = null,
         array $extras = []
     ) {
@@ -59,7 +57,6 @@ abstract class BaseRepository
     /**
      * Gets run before the model is created
      *
-     * @param  array  $attributes
      * @return void
      */
     protected function beforeCreate(array &$attributes = [])
@@ -69,7 +66,6 @@ abstract class BaseRepository
     /**
      * Creates a record
      *
-     * @param  array  $attributes
      * @return Model
      */
     public function create(array $attributes)
@@ -86,8 +82,6 @@ abstract class BaseRepository
     /**
      * After created
      *
-     * @param  Model  $model
-     * @param  array  $attributes
      * @return void
      */
     protected function afterCreated(
@@ -99,7 +93,6 @@ abstract class BaseRepository
     /**
      * Runs before model gets updated
      *
-     * @param  array  $attributes
      * @param  Model  $model
      * @return void
      */
@@ -113,7 +106,6 @@ abstract class BaseRepository
      * Updates a model
      *
      * @param  mix  $id
-     * @param  array  $attributes
      * @return Model
      */
     public function update($model, array $attributes)
@@ -134,8 +126,6 @@ abstract class BaseRepository
     /**
      * Runs after the model is updated
      *
-     * @param  Model  $model
-     * @param  array  $attributes
      * @return void
      */
     protected function afterUpdated(
@@ -161,8 +151,6 @@ abstract class BaseRepository
 
     /**
      * Guesses the model
-     *
-     * @return Model
      */
     protected function guessModel(): Model
     {

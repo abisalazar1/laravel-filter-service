@@ -2,7 +2,9 @@
 
 namespace Abix\DataFiltering\Transformers;
 
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -61,21 +63,16 @@ abstract class BaseTransformer
      * Transforms the data
      *
      * @param  mixed  $data
-     * @param  string|null  $format
-     * @return void
      */
-    public function transformData($data, ?string $format = null)
+    public function transformData($data, string $format = null): array
     {
         return $this->formatModel($data, $this->getFormatting($format));
     }
 
     /**
-     * Gets format
-     *
-     * @param  string|null  $formatMethod
-     * @return array
+     * Gets the current format
      */
-    public function getFormatting(?string $formatMethod = null): array
+    public function getFormatting(string $formatMethod = null): array
     {
         $method = Str::afterLast(Route::currentRouteAction(), '@');
 
@@ -90,7 +87,7 @@ abstract class BaseTransformer
             );
         }
         // If the require format is prefixed by a underscore it wont merge with the main format
-        $requireFormat = '_'.$requireFormat;
+        $requireFormat = config('apix.transformers.prefixes.unmerged_format').$requireFormat;
 
         if (array_key_exists($requireFormat, $this->formats)) {
             return $this->formats[$requireFormat];
@@ -100,24 +97,23 @@ abstract class BaseTransformer
     }
 
     /**
-     * Formats the model
+     * Formats the models
      *
-     * @param  Model|Collection  $collection
      * @param  array  $attributes
-     * @param  array  $currentKey
-     * @return array|null
      */
-    protected function formatModel($collection, $attributes, array $currentKey = []): ?array
+    protected function formatModel(Collection|Model|Paginator $collection, $attributes, array $currentKey = []): ?array
     {
         if (! $collection instanceof Model) {
             return optional(
-                optional($collection)->map(function ($model) use ($attributes, $currentKey) {
-                    return $this->formatModel(
-                        $model,
-                        $attributes,
-                        $currentKey
-                    );
-                })
+                optional($collection)->map(
+                    function ($model) use ($attributes, $currentKey) {
+                        return $this->formatModel(
+                            $model,
+                            $attributes,
+                            $currentKey
+                        );
+                    }
+                )
             )->toArray();
         }
 
@@ -140,17 +136,32 @@ abstract class BaseTransformer
 
             if (
                 $this->isAttributeGuarded($attribute, $currentKey, $collection) ||
-                Str::startsWith($attribute, ':')
+                Str::startsWith($attribute, config('apix.transformers.prefixes.hidden_attributes'))
             ) {
                 continue;
             }
+
+            // If table is present we should remove it
+            $attribute = Str::after($attribute, '.');
+
+            $isCustomAttribute = Str::startsWith(
+                $attribute,
+                config('apix.transformers.prefixes.custom_attributes')
+            );
+
+            $attribute = Str::replaceFirst(
+                config('apix.transformers.prefixes.custom_attributes'),
+                '',
+                $attribute
+            );
 
             $modelFormatted[$this->renameKey($attribute, $currentKey)] = $this->applyDefaultValue(
                 $this->findFormatters(
                     $attribute,
                     $this->checkForCustomAttributeAndGetValue(
                         $attribute,
-                        $collection
+                        $collection,
+                        $isCustomAttribute
                     ),
                     $currentKey
                 ),
@@ -164,24 +175,21 @@ abstract class BaseTransformer
     }
 
     /**
-     * Keys
-     *
-     * @param  string  $key
-     * @return array
+     * Renames the key
      */
-    protected function renameKey(string $key, array $currentKey = []): string
+    protected function renameKey(string $attribute, array $currentKey = []): string
     {
         // If theres nothing to rename we just return the current key
         if (! count($this->renames)) {
-            return $key;
+            return $attribute;
         }
 
         // We check if we have any global keys that we need to rename
-        if (array_key_exists('*', $this->renames) && array_key_exists($key, $this->renames['*'])) {
-            return $this->renames['*'][$key];
+        if (array_key_exists('*', $this->renames) && array_key_exists($attribute, $this->renames['*'])) {
+            return $this->renames['*'][$attribute];
         }
 
-        $currentKey[] = $key;
+        $currentKey[] = $attribute;
 
         $uniqueKey = implode('.', $currentKey);
 
@@ -189,29 +197,29 @@ abstract class BaseTransformer
             return $this->renames[$uniqueKey];
         }
 
-        return $key;
+        return $attribute;
     }
 
     /**
      * Run formatters
      *
-     * @param  string  $key
      * @param  mixed  $value
      * @return mixed
      */
-    protected function findFormatters(string $key, $value, array $currentKey = [])
+    protected function findFormatters(string $attribute, $value, array $currentKey = [])
     {
         // If there are nothing in the formatters we just return the value
         if (! count($this->formatters)) {
             return $value;
         }
+
         // We check global formatters if we have them we run the formatters
-        if (array_key_exists('*', $this->formatters) && array_key_exists($key, $this->formatters['*'])) {
-            $globalFormatters = $this->formatters['*'][$key];
+        if (array_key_exists('*', $this->formatters) && array_key_exists($attribute, $this->formatters['*'])) {
+            $globalFormatters = $this->formatters['*'][$attribute];
             $value = $this->runFormatters($value, $globalFormatters);
         }
 
-        $currentKey[] = $key;
+        $currentKey[] = $attribute;
 
         $uniqueKey = implode('.', $currentKey);
 
@@ -229,9 +237,8 @@ abstract class BaseTransformer
      *
      * @param  mixed  $value
      * @param  mixed  $formatters
-     * @return mixed
      */
-    protected function runFormatters($value, $formatters)
+    protected function runFormatters($value, $formatters): mixed
     {
         if (is_string($formatters)) {
             return $this->$formatters($value);
@@ -251,32 +258,32 @@ abstract class BaseTransformer
     }
 
     /**
-     * If it need to be a custom property it will trigger the function for it
+     * Checks if the attribute is custom
      *
-     * @param  string  $key
-     * @param  Model  $model
-     * @return mixed
+     * @param string $attribute
+     * @param mixed $model
+     * @param boolean $isCustomAttribute
+     * @return void
      */
-    protected function checkForCustomAttributeAndGetValue(string $key, $model)
+    protected function checkForCustomAttributeAndGetValue(string $attribute, $model, bool $isCustomAttribute)
     {
-        if (array_key_exists($key, $this->customAttributes)) {
-            return $this->{$this->customAttributes[$key]}($model);
+        if ($isCustomAttribute && array_key_exists($attribute, $this->customAttributes)) {
+            return $this->{$this->customAttributes[$attribute]}($model);
         }
 
-        return $model->$key;
+        return $model->$attribute;
     }
 
     /**
      * Checks if we need to apply defaults
      *
      * @param  mixed  $value
-     * @param  string  $key
      * @param  string  $uniqueKey
      * @return mixed
      */
     public function applyDefaultValue(
         $value,
-        string $key,
+        string $attribute,
         array $currentKey,
         $model
     ) {
@@ -287,9 +294,9 @@ abstract class BaseTransformer
         // We check global defaults if we have it, set the value
         if (
             array_key_exists('*', $this->defaults) &&
-            array_key_exists($key, $this->defaults['*'])
+            array_key_exists($attribute, $this->defaults['*'])
         ) {
-            $newValue = $this->defaults['*'][$key];
+            $newValue = $this->defaults['*'][$attribute];
             if (is_string($newValue) && method_exists($this, $newValue)) {
                 return $this->$newValue($model);
             }
@@ -297,7 +304,7 @@ abstract class BaseTransformer
             return $newValue;
         }
 
-        $currentKey[] = $key;
+        $currentKey[] = $attribute;
 
         $uniqueKey = implode('.', $currentKey);
 
@@ -315,22 +322,19 @@ abstract class BaseTransformer
 
     /**
      * Check for guarded prop
-     *
-     * @return bool
      */
-    protected function isAttributeGuarded(string $key, array $currentKey, $model): bool
+    protected function isAttributeGuarded(string $attribute, array $currentKey, $model): bool
     {
         // We check global defaults if we have it, set the value
         if (
             array_key_exists('*', $this->guarded) &&
-            array_key_exists($key, $this->guarded['*']) &&
-            method_exists($this, $this->guarded['*'][$key])
-
+            array_key_exists($attribute, $this->guarded['*']) &&
+            method_exists($this, $this->guarded['*'][$attribute])
         ) {
-            return $this->{$this->guarded['*'][$key]}($model);
+            return $this->{$this->guarded['*'][$attribute]}($model);
         }
 
-        $currentKey[] = $key;
+        $currentKey[] = $attribute;
 
         $uniqueKey = implode('.', $currentKey);
 

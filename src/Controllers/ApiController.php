@@ -71,11 +71,9 @@ class ApiController
     /**
      * Sets http code
      *
-     * @param  int  $code
      * @param  string  $message
-     * @return self
      */
-    protected function setCode(int $code, ?string $message = null): self
+    protected function setCode(int $code, string $message = null): self
     {
         $this->code = $code;
 
@@ -90,9 +88,6 @@ class ApiController
 
     /**
      * Sets the transformer
-     *
-     * @param  string  $transformer
-     * @return self
      */
     protected function setTransformer(string $transformer): self
     {
@@ -107,7 +102,6 @@ class ApiController
      * @param  Collection|Model  $data
      * @param  string  $wrapper
      * @param  string  $method
-     * @return self
      */
     protected function setData(
         $data,
@@ -131,10 +125,6 @@ class ApiController
 
     /**
      * Sends the response
-     *
-     * @param  array|null  $response
-     * @param  bool  $overide
-     * @return JsonResponse
      */
     protected function respond(
         ?array $response = [],
@@ -159,8 +149,6 @@ class ApiController
 
     /**
      * Gets the status message
-     *
-     * @return string
      */
     protected function getStatusMessage(): string
     {
@@ -173,9 +161,6 @@ class ApiController
 
     /**
      * Gets the pagination
-     *
-     * @param  LengthAwarePaginator  $data
-     * @return array
      */
     protected function getPagination(LengthAwarePaginator $data): array
     {
@@ -193,8 +178,6 @@ class ApiController
 
     /**
      * Resolves the transformer
-     *
-     * @return BaseTransformer
      */
     protected function guessTransformer(): BaseTransformer
     {
@@ -211,8 +194,6 @@ class ApiController
 
     /**
      * Repository
-     *
-     * @return BaseRepository
      */
     protected function guessRepository(): BaseRepository
     {

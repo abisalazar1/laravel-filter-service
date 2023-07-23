@@ -10,8 +10,6 @@ abstract class BaseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -26,8 +24,6 @@ abstract class BaseRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -51,8 +47,6 @@ abstract class BaseRequest extends FormRequest
 
     /**
      * Index rules
-     *
-     * @return array
      */
     protected function indexRules(): array
     {
@@ -65,9 +59,6 @@ abstract class BaseRequest extends FormRequest
 
     /**
      * Guess the method to trigger
-     *
-     * @param  string  $ending
-     * @return string
      */
     protected function guessMethodFor(string $ending): string
     {
@@ -76,8 +67,6 @@ abstract class BaseRequest extends FormRequest
 
     /**
      * Action
-     *
-     * @return string
      */
     protected function getRouteAction(): string
     {
@@ -86,16 +75,11 @@ abstract class BaseRequest extends FormRequest
 
     /**
      * All rules
-     *
-     * @return array
      */
     abstract public function actionsRules(): array;
 
     /**
      * Gets specific action rules
-     *
-     * @param  string  $action
-     * @return array
      */
     protected function getActionRule(string $action): array
     {

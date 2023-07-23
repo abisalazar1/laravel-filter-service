@@ -24,12 +24,9 @@ class AuthorisationException extends Exception
 
     /**
      * Constructor
-     *
-     * @param  string|null  $message
-     * @param  int|null  $code
      */
     public function __construct(
-        ?string $message = null,
+        string $message = null,
         ?int $code = 403,
         ?string $view = 'error.error'
     ) {
@@ -41,7 +38,6 @@ class AuthorisationException extends Exception
     /**
      * render the request
      *
-     * @param  Request  $request
      * @return Response
      */
     public function render(Request $request)
@@ -68,9 +64,8 @@ class AuthorisationException extends Exception
      * Gets the status text
      *
      * @param  string  $message
-     * @return string
      */
-    public function getErrorMessage(?string $message = null): string
+    public function getErrorMessage(string $message = null): string
     {
         if ($message) {
             return $message;

@@ -46,9 +46,6 @@ class BaseAuthorisationService
 
     /**
      * Gets a property
-     *
-     * @param  string  $property
-     * @return mixed
      */
     public function getProperty(string $property): mixed
     {
@@ -57,8 +54,6 @@ class BaseAuthorisationService
 
     /**
      * Gets current property
-     *
-     * @return mixed
      */
     public function getMainProperty(): mixed
     {
@@ -67,9 +62,6 @@ class BaseAuthorisationService
 
     /**
      * Sets current property
-     *
-     * @param  mixed  $property
-     * @return self
      */
     public function setMainProperty(mixed $property): self
     {
@@ -80,9 +72,6 @@ class BaseAuthorisationService
 
     /**
      * Properties
-     *
-     * @param  array  $properties
-     * @return self
      */
     public function setProperties(array $properties = []): self
     {
@@ -95,7 +84,6 @@ class BaseAuthorisationService
      * Sets the model to authenticate
      *
      * @param  User  $user
-     * @return self
      */
     public function setUser(?User $user): self
     {
@@ -106,8 +94,6 @@ class BaseAuthorisationService
 
     /**
      * Gets the results as a boolean
-     *
-     * @return self
      */
     public function skipExceptions(): self
     {
@@ -118,11 +104,8 @@ class BaseAuthorisationService
 
     /**
      * Check that if model belongs to user owner
-     *
-     * @param  string|null  $property
-     * @return self
      */
-    public function doesItBelongToUser(?string $property = null): self
+    public function doesItBelongToUser(string $property = null): self
     {
         $property = $property ? $this->getProperty($property) : $this->getMainProperty();
 
@@ -141,7 +124,6 @@ class BaseAuthorisationService
      * Verifies that the authenticatable model has the correct password
      *
      * @param  string  $password
-     * @return self
      */
     public function passwordVerification(?string $password): self
     {
@@ -154,8 +136,6 @@ class BaseAuthorisationService
 
     /**
      * Requires a logged in user
-     *
-     * @return self
      */
     public function requireUser(): self
     {
@@ -168,8 +148,6 @@ class BaseAuthorisationService
 
     /**
      * Gets all the current errors
-     *
-     * @return array
      */
     public function getErrors(): array
     {
@@ -178,8 +156,6 @@ class BaseAuthorisationService
 
     /**
      * Checks the validation has passed
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
@@ -189,8 +165,6 @@ class BaseAuthorisationService
     /**
      * Throws the exception or adds the error to the bag
      *
-     * @param  string  $message
-     * @return void
      *
      * @throws AuthorisationException
      */

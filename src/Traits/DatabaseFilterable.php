@@ -11,8 +11,6 @@ trait DatabaseFilterable
     /**
      * Apply filters
      *
-     * @param  array  $data
-     * @param  User|null  $user
      * @param  Builder  $query
      * @return mixed
      */
@@ -40,8 +38,6 @@ trait DatabaseFilterable
     /**
      * Search
      *
-     * @param  Builder  $builder
-     * @param  string  $search
      * @return Builder
      */
     public function scopeSearch(Builder $builder, string $search)
