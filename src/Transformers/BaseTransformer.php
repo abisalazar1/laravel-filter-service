@@ -260,9 +260,7 @@ abstract class BaseTransformer
     /**
      * Checks if the attribute is custom
      *
-     * @param string $attribute
-     * @param mixed $model
-     * @param boolean $isCustomAttribute
+     * @param  mixed  $model
      * @return void
      */
     protected function checkForCustomAttributeAndGetValue(string $attribute, $model, bool $isCustomAttribute)
