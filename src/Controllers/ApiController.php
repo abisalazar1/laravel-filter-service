@@ -1,9 +1,9 @@
 <?php
 
-namespace Abix\DataFiltering\Controllers;
+namespace Devespresso\DataFiltering\Controllers;
 
-use Abix\DataFiltering\Repositories\BaseRepository;
-use Abix\DataFiltering\Transformers\BaseTransformer;
+use Devespresso\DataFiltering\Repositories\BaseRepository;
+use Devespresso\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;

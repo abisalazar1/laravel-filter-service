@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering\Requests;
+namespace Devespresso\DataFiltering\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;

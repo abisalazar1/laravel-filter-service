@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering\Exceptions;
+namespace Devespresso\DataFiltering\Exceptions;
 
 use Exception;
 use Illuminate\Http\Request;

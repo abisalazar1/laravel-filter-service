@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering\Transformers;
+namespace Devespresso\DataFiltering\Transformers;
 
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Model;

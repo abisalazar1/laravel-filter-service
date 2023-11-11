@@ -1,24 +1,24 @@
 {
-    "name": "abix/data-filtering",
+    "name": "devespresso/data-filtering",
     "description": "Data filtering",
     "type": "project",
     "license": "MIT",
     "authors": [
         {
             "name": "Abi",
-            "email": "abi_salazar@hotmail.co.uk"
+            "email": "abi@devespresso.co.uk"
         }
     ],
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "Abix\\DataFiltering\\": "src"
+            "Devespresso\\DataFiltering\\": "src"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Abix\\DataFiltering\\DataFilteringServiceProvider"
+                "Devespresso\\DataFiltering\\DataFilteringServiceProvider"
             ]
         }
     }

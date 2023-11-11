@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering\Repositories;
+namespace Devespresso\DataFiltering\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;

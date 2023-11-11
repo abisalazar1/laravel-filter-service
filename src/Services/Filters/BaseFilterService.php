@@ -1,8 +1,8 @@
 <?php
 
-namespace Abix\DataFiltering\Services\Filters;
+namespace Devespresso\DataFiltering\Services\Filters;
 
-use Abix\DataFiltering\Transformers\BaseTransformer;
+use Devespresso\DataFiltering\Transformers\BaseTransformer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Str;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Abix\DataFiltering;
+namespace Devespresso\DataFiltering;
 
 use Illuminate\Support\ServiceProvider;
 

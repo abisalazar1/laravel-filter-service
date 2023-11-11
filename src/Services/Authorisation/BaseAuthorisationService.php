@@ -1,8 +1,8 @@
 <?php
 
-namespace Abix\DataFiltering\Services\Authorisation;
+namespace Devespresso\DataFiltering\Services\Authorisation;
 
-use Abix\DataFiltering\Exceptions\AuthorisationException;
+use Devespresso\DataFiltering\Exceptions\AuthorisationException;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
 

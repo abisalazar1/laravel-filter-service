@@ -1,8 +1,8 @@
 <?php
 
-namespace Abix\DataFiltering\Traits;
+namespace Devespresso\DataFiltering\Traits;
 
-use Abix\DataFiltering\Services\Filters\BaseFilterService;
+use Devespresso\DataFiltering\Services\Filters\BaseFilterService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User;
 
