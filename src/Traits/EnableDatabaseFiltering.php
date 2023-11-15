@@ -6,7 +6,7 @@ use Devespresso\DataFiltering\Services\Filters\BaseFilterService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User;
 
-trait DatabaseFilterable
+trait EnableDatabaseFiltering
 {
     /**
      * Apply filters
