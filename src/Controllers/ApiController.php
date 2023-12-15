@@ -70,10 +70,8 @@ class ApiController
 
     /**
      * Sets http code
-     *
-     * @param  string  $message
      */
-    protected function setCode(int $code, string $message = null): self
+    protected function setCode(int $code, ?string $message = null): self
     {
         $this->code = $code;
 
@@ -100,13 +98,12 @@ class ApiController
      * Sets the main data
      *
      * @param  Collection|Model  $data
-     * @param  string  $wrapper
      * @param  string  $method
      */
     protected function setData(
         $data,
-        string $wrapper = null,
-        string $format = null
+        ?string $wrapper = null,
+        ?string $format = null
     ): self {
         $transformer = $this->guessTransformer();
 
@@ -204,6 +201,7 @@ class ApiController
         $repository = (string) Str::of(class_basename($this))
             ->prepend(config('apix.paths.repositories'))
             ->replace('Controller', 'Repository');
+
         return resolve($repository);
     }
 }

@@ -82,8 +82,6 @@ class BaseAuthorisationService
 
     /**
      * Sets the model to authenticate
-     *
-     * @param  User  $user
      */
     public function setUser(?User $user): self
     {
@@ -105,7 +103,7 @@ class BaseAuthorisationService
     /**
      * Check that if model belongs to user owner
      */
-    public function doesItBelongToUser(string $property = null): self
+    public function doesItBelongToUser(?string $property = null): self
     {
         $property = $property ? $this->getProperty($property) : $this->getMainProperty();
 
@@ -122,8 +120,6 @@ class BaseAuthorisationService
 
     /**
      * Verifies that the authenticatable model has the correct password
-     *
-     * @param  string  $password
      */
     public function passwordVerification(?string $password): self
     {

@@ -64,7 +64,7 @@ abstract class BaseTransformer
      *
      * @param  mixed  $data
      */
-    public function transformData($data, string $format = null): array
+    public function transformData($data, ?string $format = null): array
     {
         return $this->formatModel($data, $this->getFormatting($format));
     }
@@ -72,7 +72,7 @@ abstract class BaseTransformer
     /**
      * Gets the current format
      */
-    public function getFormatting(string $formatMethod = null): array
+    public function getFormatting(?string $formatMethod = null): array
     {
         $method = Str::afterLast(Route::currentRouteAction(), '@');
 

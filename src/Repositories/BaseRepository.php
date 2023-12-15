@@ -31,7 +31,7 @@ abstract class BaseRepository
      */
     public function index(
         array $data,
-        User $user = null,
+        ?User $user = null,
         $query = null,
         array $extras = []
     ) {
@@ -93,11 +93,10 @@ abstract class BaseRepository
     /**
      * Runs before model gets updated
      *
-     * @param  Model  $model
      * @return void
      */
     protected function beforeUpdate(
-        Model $model = null,
+        ?Model $model = null,
         array &$attributes = []
     ) {
     }

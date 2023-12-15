@@ -171,9 +171,8 @@ class BaseFilterService
     /**
      * Sets conditions
      */
-    public function setConditions(): self
+    protected function setConditions(): void
     {
-        return $this;
     }
 
     /**
@@ -194,21 +193,17 @@ class BaseFilterService
     /**
      * Adds the select
      */
-    public function setSelect(array $value = []): self
+    public function setSelect(array $value = []): void
     {
         $this->select = count($value) ? $value : $this->select;
-
-        return $this;
     }
 
     /**
      * Disables the conditions
      */
-    public function disableConditions(): self
+    public function disableConditions(): void
     {
         $this->runConditions = false;
-
-        return $this;
     }
 
     /**
@@ -254,11 +249,9 @@ class BaseFilterService
     /**
      * Search specific table
      */
-    public function search(string $search): self
+    public function search(string $search): void
     {
         $this->query->search($search);
-
-        return $this;
     }
 
     /**
@@ -266,12 +259,11 @@ class BaseFilterService
      *
      * @param  string|array  $sort
      */
-    public function sort($sortValues): self
+    public function sort(array|string $sortValues, bool $hasBeenRenamed = false): self
     {
         $sortValues = is_iterable($sortValues) ? $sortValues : [$sortValues];
-
         foreach ($sortValues as $sort) {
-            $this->applySort($sort);
+            $this->applySort($sort, $hasBeenRenamed);
         }
 
         return $this;
@@ -280,61 +272,43 @@ class BaseFilterService
     /**
      * Apply sort
      */
-    public function applySort(string $sort): self
+    public function applySort(string $sort, bool $hasBeenRenamed = false): void
     {
-        [$originalColumn, $originalOrder] = $this->getSortValues($sort);
-
-        $column = $originalColumn;
-
-        $order = $originalOrder === 'asc' ? 'asc' : 'desc';
-
+        // Extract the values
+        [$column, $order] = array_pad(explode(',', $sort), 2, 'desc');
+        // Sets the order
+        $order = $order === 'asc' ? 'asc' : 'desc';
+        // Allowed columns
         $allowedColumns = array_merge($this->sortColumns, $this->customSortColumns);
+        // Check if it is a renamed column
+        if (array_key_exists($column, $allowedColumns)) {
+            $this->sort($allowedColumns[$column], $hasBeenRenamed);
 
-        if (! in_array($originalColumn, $allowedColumns)) {
-            [$column, $newOrder] = $this->getSortValues($this->defaultSortingColumn);
+            return;
         }
+        // Check if the order is allowed
+        if (! in_array($column, $allowedColumns) && ! $hasBeenRenamed) {
+            $this->sort($this->defaultSortingColumn);
 
-        if (isset($allowedColumns[$originalColumn])) {
-            [$column, $newOrder] = $this->getSortValues(
-                $allowedColumns[$originalColumn]
-            );
+            return;
         }
-
-        if (! $originalOrder && isset($newOrder)) {
-            $order = $newOrder;
-        }
-
         $this->query->orderBy($column, $order);
-
-        return $this;
-    }
-
-    /**
-     * Extract values
-     */
-    private function getSortValues(string $sort): array
-    {
-        return array_pad(explode(',', $sort), 2, null);
     }
 
     /**
      * Sets relations to eager load
      */
-    protected function with(array $data): self
+    protected function with(array $data): void
     {
         $this->query->with($data);
-
-        return $this;
     }
 
     /**
      * Sets count for relationships
      */
-    protected function withCount(array $data): self
+    protected function withCount(array $data): void
     {
         $this->query->withCount($data);
-
-        return $this;
     }
 
     /**
@@ -389,9 +363,7 @@ class BaseFilterService
     protected function addSelectBasedOnTransformer(): void
     {
         $transformer = $this->guessTransformer();
-
         $format = $transformer->getFormatting();
-
         $this->addSelectAndEagerLoad($this->query, $format);
     }
 
@@ -407,11 +379,9 @@ class BaseFilterService
             $columns = array_filter($format, function ($item) {
                 return ! is_array($item);
             });
-
             if (! count($columns)) {
                 $columns = ['*'];
             }
-
             $query->select(
                 array_filter(array_map(function ($item) {
                     return Str::replaceFirst(
@@ -427,13 +397,11 @@ class BaseFilterService
                 })
             );
         }
-
         if (config('apix.auto_eager_load')) {
             foreach ($format as $relation => $select) {
                 if (! is_array($select)) {
                     continue;
                 }
-
                 $query->with($relation, function ($query) use ($select) {
                     $this->addSelectAndEagerLoad($query, $select);
                 });
@@ -474,7 +442,7 @@ class BaseFilterService
     /**
      * Get
      */
-    protected function getPaginationMethod(bool $withPages = null): string
+    protected function getPaginationMethod(?bool $withPages = null): string
     {
         if (is_null($withPages)) {
             return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';

@@ -48,7 +48,9 @@ trait EnableDatabaseFiltering
 
         foreach ($terms as $term) {
             foreach ($columns as $column) {
-                $builder->where($column, 'LIKE', '%'.$term.'%');
+                $builder->where(function ($query) use ($column, $term) {
+                    $query->orWhere($column, 'LIKE', '%'.$term.'%');
+                });
             }
         }
 
