@@ -183,7 +183,7 @@ class ApiController
         }
 
         $transformer = (string) Str::of(class_basename($this))
-            ->prepend(config('apix.paths.transformers'))
+            ->prepend(config('devespressoApi.paths.transformers'))
             ->replace('Controller', 'Transformer');
 
         return resolve($transformer);
@@ -199,7 +199,7 @@ class ApiController
         }
 
         $repository = (string) Str::of(class_basename($this))
-            ->prepend(config('apix.paths.repositories'))
+            ->prepend(config('devespressoApi.paths.repositories'))
             ->replace('Controller', 'Repository');
 
         return resolve($repository);

@@ -158,7 +158,7 @@ abstract class BaseRepository
         }
 
         $model = (string) Str::of(class_basename($this))
-            ->prepend(config('apix.paths.models'))
+            ->prepend(config('devespressoApi.paths.models'))
             ->replace('Repository', '');
 
         return new $model();

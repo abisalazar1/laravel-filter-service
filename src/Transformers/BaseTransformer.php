@@ -87,7 +87,7 @@ abstract class BaseTransformer
             );
         }
         // If the require format is prefixed by a underscore it wont merge with the main format
-        $requireFormat = config('apix.transformers.prefixes.unmerged_format').$requireFormat;
+        $requireFormat = config('devespressoApi.transformers.prefixes.unmerged_format').$requireFormat;
 
         if (array_key_exists($requireFormat, $this->formats)) {
             return $this->formats[$requireFormat];
@@ -136,7 +136,7 @@ abstract class BaseTransformer
 
             if (
                 $this->isAttributeGuarded($attribute, $currentKey, $collection) ||
-                Str::startsWith($attribute, config('apix.transformers.prefixes.hidden_attributes'))
+                Str::startsWith($attribute, config('devespressoApi.transformers.prefixes.hidden_attributes'))
             ) {
                 continue;
             }
@@ -146,11 +146,11 @@ abstract class BaseTransformer
 
             $isCustomAttribute = Str::startsWith(
                 $attribute,
-                config('apix.transformers.prefixes.custom_attributes')
+                config('devespressoApi.transformers.prefixes.custom_attributes')
             );
 
             $attribute = Str::replaceFirst(
-                config('apix.transformers.prefixes.custom_attributes'),
+                config('devespressoApi.transformers.prefixes.custom_attributes'),
                 '',
                 $attribute
             );

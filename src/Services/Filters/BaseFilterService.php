@@ -375,7 +375,7 @@ class BaseFilterService
      */
     protected function addSelectAndEagerLoad($query, $format): void
     {
-        if (config('apix.auto_select')) {
+        if (config('devespressoApi.auto_select')) {
             $columns = array_filter($format, function ($item) {
                 return ! is_array($item);
             });
@@ -385,19 +385,19 @@ class BaseFilterService
             $query->select(
                 array_filter(array_map(function ($item) {
                     return Str::replaceFirst(
-                        config('apix.transformers.prefixes.hidden_attributes'),
+                        config('devespressoApi.transformers.prefixes.hidden_attributes'),
                         '',
                         $item
                     );
                 }, $columns), function ($item) {
                     return ! Str::startsWith(
                         $item,
-                        config('apix.transformers.prefixes.custom_attributes')
+                        config('devespressoApi.transformers.prefixes.custom_attributes')
                     );
                 })
             );
         }
-        if (config('apix.auto_eager_load')) {
+        if (config('devespressoApi.auto_eager_load')) {
             foreach ($format as $relation => $select) {
                 if (! is_array($select)) {
                     continue;
@@ -419,7 +419,7 @@ class BaseFilterService
         }
 
         $transformer = (string) Str::of(class_basename($this->model))
-            ->prepend(config('apix.paths.transformers'))
+            ->prepend(config('devespressoApi.paths.transformers'))
             ->append('Transformer');
 
         return resolve($transformer);
@@ -445,7 +445,7 @@ class BaseFilterService
     protected function getPaginationMethod(?bool $withPages = null): string
     {
         if (is_null($withPages)) {
-            return config('apix.pagination.with_pages') ? 'paginate' : 'simplePaginate';
+            return config('devespressoApi.pagination.with_pages') ? 'paginate' : 'simplePaginate';
         }
 
         return $withPages ? 'paginate' : 'simplePaginate';
