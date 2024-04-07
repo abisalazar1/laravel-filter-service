@@ -14,7 +14,7 @@ class DataFilteringServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/config/devespressoApi.php' => config_path('devespressoApi.php'),
+            __DIR__ . '/config/devespressoApi.php' => config_path('devespressoApi.php'),
         ]);
     }
 
@@ -26,7 +26,7 @@ class DataFilteringServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/config/devespressoApi.php',
+            __DIR__ . '/config/devespressoApi.php',
             'devespressoApi'
         );
     }

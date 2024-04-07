@@ -87,7 +87,7 @@ abstract class BaseTransformer
             );
         }
         // If the require format is prefixed by a underscore it wont merge with the main format
-        $requireFormat = config('devespressoApi.transformers.prefixes.unmerged_format').$requireFormat;
+        $requireFormat = config('devespressoApi.transformers.prefixes.unmerged_format') . $requireFormat;
 
         if (array_key_exists($requireFormat, $this->formats)) {
             return $this->formats[$requireFormat];
@@ -101,9 +101,13 @@ abstract class BaseTransformer
      *
      * @param  array  $attributes
      */
-    protected function formatModel(Collection|Model|Paginator $collection, $attributes, array $currentKey = []): ?array
+    protected function formatModel(Collection|Model|Paginator|null $collection, $attributes, array $currentKey = []): ?array
     {
-        if (! $collection instanceof Model) {
+        if (!$collection) {
+            return null;
+        }
+
+        if (!$collection instanceof Model) {
             return optional(
                 optional($collection)->map(
                     function ($model) use ($attributes, $currentKey) {
@@ -180,7 +184,7 @@ abstract class BaseTransformer
     protected function renameKey(string $attribute, array $currentKey = []): string
     {
         // If theres nothing to rename we just return the current key
-        if (! count($this->renames)) {
+        if (!count($this->renames)) {
             return $attribute;
         }
 
@@ -209,7 +213,7 @@ abstract class BaseTransformer
     protected function findFormatters(string $attribute, $value, array $currentKey = [])
     {
         // If there are nothing in the formatters we just return the value
-        if (! count($this->formatters)) {
+        if (!count($this->formatters)) {
             return $value;
         }
 
@@ -223,7 +227,7 @@ abstract class BaseTransformer
 
         $uniqueKey = implode('.', $currentKey);
 
-        if (! array_key_exists($uniqueKey, $this->formatters)) {
+        if (!array_key_exists($uniqueKey, $this->formatters)) {
             return $value;
         }
 
@@ -285,7 +289,7 @@ abstract class BaseTransformer
         array $currentKey,
         $model
     ) {
-        if (! is_null($value)) {
+        if (!is_null($value)) {
             return $value;
         }
 

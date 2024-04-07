@@ -249,7 +249,7 @@ class BaseFilterService
     /**
      * Search specific table
      */
-    public function search(string $search): void
+    public function search(?string $search): void
     {
         $this->query->search($search);
     }

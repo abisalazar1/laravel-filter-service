@@ -3,7 +3,9 @@
 namespace Devespresso\DataFiltering\Traits;
 
 use Devespresso\DataFiltering\Services\Filters\BaseFilterService;
+use function Laravel\Prompts\search;
 use Illuminate\Database\Eloquent\Builder;
+
 use Illuminate\Foundation\Auth\User;
 
 trait EnableDatabaseFiltering
@@ -40,16 +42,17 @@ trait EnableDatabaseFiltering
      *
      * @return Builder
      */
-    public function scopeSearch(Builder $builder, string $search)
+    public function scopeSearch(Builder $builder, ?string $search)
     {
+        if (!$search) {
+            return $builder;
+        }
         $columns = $this->searchableColumns ?? [];
-
         $terms = explode(' ', $search);
-
         foreach ($terms as $term) {
             foreach ($columns as $column) {
                 $builder->where(function ($query) use ($column, $term) {
-                    $query->orWhere($column, 'LIKE', '%'.$term.'%');
+                    $query->orWhere($column, 'LIKE', '%' . $term . '%');
                 });
             }
         }
