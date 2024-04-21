@@ -151,7 +151,7 @@ class BaseFilterService
      */
     public function setQuery($query): self
     {
-        if (! $this->query) {
+        if (!$this->query) {
             $this->query = $query;
         }
 
@@ -184,7 +184,7 @@ class BaseFilterService
     ): void {
         foreach ($filters as $method => $value) {
             $method = Str::camel($method);
-            if (! in_array($method, $guarded) && method_exists($this, $method)) {
+            if (!in_array($method, $guarded) && method_exists($this, $method)) {
                 $this->$method($value);
             }
         }
@@ -232,7 +232,7 @@ class BaseFilterService
             ...optional($this->user)->isAdmin() ? [] : $this->adminMethods,
         ]);
 
-        if (! isset($this->data['sort'])) {
+        if (!isset($this->data['sort'])) {
             $this->sort($this->defaultSortingColumn);
         }
 
@@ -287,7 +287,7 @@ class BaseFilterService
             return;
         }
         // Check if the order is allowed
-        if (! in_array($column, $allowedColumns) && ! $hasBeenRenamed) {
+        if (!in_array($column, $allowedColumns) && !$hasBeenRenamed) {
             $this->sort($this->defaultSortingColumn);
 
             return;
@@ -332,7 +332,7 @@ class BaseFilterService
      */
     public function getDataValue(string $key, $default = null)
     {
-        if (! $this->dataHasKeys([$key])) {
+        if (!$this->dataHasKeys([$key])) {
             return $default;
         }
 
@@ -376,32 +376,38 @@ class BaseFilterService
     protected function addSelectAndEagerLoad($query, $format): void
     {
         if (config('devespressoApi.auto_select')) {
-            $columns = array_filter($format, function ($item) {
-                return ! is_array($item);
-            });
-            if (! count($columns)) {
+            $columns = array_filter($format, fn ($item) => !is_array($item));
+            if (!count($columns)) {
                 $columns = ['*'];
             }
-            $query->select(
-                array_filter(array_map(function ($item) {
-                    return Str::replaceFirst(
-                        config('devespressoApi.transformers.prefixes.hidden_attributes'),
-                        '',
-                        $item
-                    );
-                }, $columns), function ($item) {
-                    return ! Str::startsWith(
-                        $item,
-                        config('devespressoApi.transformers.prefixes.custom_attributes')
-                    );
-                })
+            $hiddenAttributes = array_map(fn ($item) => Str::replaceFirst(
+                config('devespressoApi.transformers.prefixes.hidden_attributes'),
+                '',
+                $item
+            ), $columns);
+            /**
+             * Remove Custom attributes
+             */
+            $columnWithoutCustom = array_filter(
+                $hiddenAttributes,
+                fn ($item) =>
+                !Str::startsWith(
+                    $item,
+                    config('devespressoApi.transformers.prefixes.custom_attributes')
+                )
             );
+            $query->select($columnWithoutCustom);
         }
         if (config('devespressoApi.auto_eager_load')) {
             foreach ($format as $relation => $select) {
-                if (! is_array($select)) {
+                if (!is_array($select)) {
                     continue;
                 }
+                $relation = Str::replaceFirst(
+                    config('devespressoApi.transformers.prefixes.hidden_attributes'),
+                    '',
+                    $relation
+                );
                 $query->with($relation, function ($query) use ($select) {
                     $this->addSelectAndEagerLoad($query, $select);
                 });
@@ -435,7 +441,7 @@ class BaseFilterService
         return array_filter(array_map(function ($method) {
             return $method->getName();
         }, $class->getMethods()), function ($item) {
-            return ! in_array($item, ['sort', 'search']);
+            return !in_array($item, ['sort', 'search']);
         });
     }
 

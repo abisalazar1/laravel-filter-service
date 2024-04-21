@@ -124,6 +124,12 @@ abstract class BaseTransformer
         $modelFormatted = [];
 
         foreach ($attributes as $key => $attribute) {
+            if (
+                Str::startsWith($key, config('devespressoApi.transformers.prefixes.hidden_attributes'))
+            ) {
+                continue;
+            }
+
             if (is_iterable($attribute)) {
                 $renamedKey = $this->renameKey($key, $currentKey);
 
@@ -216,7 +222,6 @@ abstract class BaseTransformer
         if (!count($this->formatters)) {
             return $value;
         }
-
         // We check global formatters if we have them we run the formatters
         if (array_key_exists('*', $this->formatters) && array_key_exists($attribute, $this->formatters['*'])) {
             $globalFormatters = $this->formatters['*'][$attribute];
