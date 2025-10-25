@@ -373,7 +373,7 @@ class BaseFilterService
      * @param  Builder  $query
      * @param  array  $format
      */
-    protected function addSelectAndEagerLoad($query, $format): void
+    protected function addSelectAndEagerLoad($query, array $format, ?string $table = null): void
     {
         if (config('devespressoApi.auto_select')) {
             $columns = array_filter($format, fn ($item) => !is_array($item));
@@ -396,7 +396,14 @@ class BaseFilterService
                     config('devespressoApi.transformers.prefixes.custom_attributes')
                 )
             );
-            $query->select($columnWithoutCustom);
+
+            if (!$table) {
+                $table = $this->model->getTable();
+            }
+
+            $columnsWithTableName = array_map(fn ($col) => $table . '.' . $col, $columnWithoutCustom);
+
+            $query->addSelect($columnsWithTableName);
         }
         if (config('devespressoApi.auto_eager_load')) {
             foreach ($format as $relation => $select) {
@@ -409,7 +416,7 @@ class BaseFilterService
                     $relation
                 );
                 $query->with($relation, function ($query) use ($select) {
-                    $this->addSelectAndEagerLoad($query, $select);
+                    $this->addSelectAndEagerLoad($query, $select, $query->getQuery()?->from);
                 });
             }
         }

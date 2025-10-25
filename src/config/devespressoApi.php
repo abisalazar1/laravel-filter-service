@@ -23,7 +23,7 @@ return [
     'transformers' => [
         'prefixes' => [
             'hidden_attributes' => ':',
-            'custom_attributes' => '~',
+            'custom_attributes' => '-',
             'unmerged_format' => '_',
         ],
     ],
