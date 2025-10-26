@@ -240,7 +240,7 @@ class BaseFilterService
         $this->setFilters($this->autoApply);
 
         $paginateMethod = $this->getPaginationMethod(
-            $this->getDataValue('with_pages')
+            $this->getDataValue('pagination_type')
         );
 
         return $this->query->$paginateMethod($this->getPerPage());
@@ -455,13 +455,17 @@ class BaseFilterService
     /**
      * Get
      */
-    protected function getPaginationMethod(?bool $withPages = null): string
+    protected function getPaginationMethod(?string $paginationType = null): string
     {
-        if (is_null($withPages)) {
+        if (is_null($paginationType)) {
             return config('devespressoApi.pagination.with_pages') ? 'paginate' : 'simplePaginate';
         }
 
-        return $withPages ? 'paginate' : 'simplePaginate';
+        if ($paginationType === 'none') {
+            return 'get';
+        }
+
+        return $paginationType !== 'simple' ? 'paginate' : 'simplePaginate';
     }
 
     /**
